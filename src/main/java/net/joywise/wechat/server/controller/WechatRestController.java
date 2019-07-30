@@ -1,8 +1,11 @@
 package net.joywise.wechat.server.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import net.joywise.wechat.server.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,6 +21,11 @@ public class WechatRestController {
 
     @Autowired
     private AuthService authService;
+
+    @Value("${com.constant.weixin.appId}")
+    public String appId;//自己在微信测试平台设置的appId
+    @Value("${com.constant.weixin.secret}")
+    public String secret;//自己在微信测试平台设置的secret
 
 
     /**
@@ -48,6 +56,12 @@ public class WechatRestController {
         return null;
     }
 
-
+    @RequestMapping(value = "/app_info", method = RequestMethod.GET)
+    public String getWxInfo(){
+        JSONObject result = new JSONObject();
+        result.put("appId", appId);
+        result.put("appSecret", secret);
+        return result.toString();
+    }
 
 }

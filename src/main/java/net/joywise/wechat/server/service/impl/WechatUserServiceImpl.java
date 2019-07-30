@@ -4,14 +4,20 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import net.joywise.wechat.server.bean.db.WechatUser;
-import net.joywise.wechat.server.dao.WechatUserRepository;
+import net.joywise.wechat.server.bean.wechat.Oauth2AccessToken;
+import net.joywise.wechat.server.dao.WechatUserDao;
 import net.joywise.wechat.server.enums.AiLangType;
-import net.joywise.wechat.server.service.AccessTokenService;
+import net.joywise.wechat.server.error.WxError;
+import net.joywise.wechat.server.error.WxErrorException;
+import net.joywise.wechat.server.service.BaseAccessTokenService;
 import net.joywise.wechat.server.service.WechatUserService;
 import net.joywise.wechat.server.util.HttpConnectionUtils;
+import net.joywise.wechat.server.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,11 +29,13 @@ import java.util.Map;
 public class WechatUserServiceImpl implements WechatUserService {
 
     @Autowired
-    private WechatUserRepository wechatUserRepository;
+    private WechatUserDao wechatUserDao;
 
     @Autowired
-    private AccessTokenService accessTokenService;
+    private BaseAccessTokenService baseAccessTokenService;
 
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Value("${com.constant.weixin.appId}")
     public String appId;//自己在微信测试平台设置的appId
@@ -36,18 +44,19 @@ public class WechatUserServiceImpl implements WechatUserService {
 
 
     @Override
+    public WechatUser getUserInfoFromDB(String openId) {
+        WechatUser user = wechatUserDao.queryByOpenId(openId);
+        return user;
+    }
+
+    @Override
     public void saveInDB(WechatUser wechatUser) {
-        WechatUser user = wechatUserRepository.queryByOpenId(wechatUser.getOpenId());
-        if (user != null) {
-            log.debug(wechatUser.getNickName() + " ; " + wechatUser.getOpenId() + " ; 以前已经保存在数据库里啦。");
-            return;
-        }
-        wechatUserRepository.save(wechatUser);
+        wechatUserDao.save(wechatUser);
     }
 
     @Override
     public List<WechatUser> getAllFromDB() {
-        return (List<WechatUser>) wechatUserRepository.findAll();
+        return (List<WechatUser>) wechatUserDao.findAll();
     }
 
     @Override
@@ -74,17 +83,26 @@ public class WechatUserServiceImpl implements WechatUserService {
          *     "qr_scene_str": ""
          * }
          */
-        String accessToken = accessTokenService.getToken();
+        WechatUser wechatUser = null;
+        String accessToken = null;
+        try {
+            accessToken = baseAccessTokenService.getToken();
+            String url = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={access_token}&openid={openid}&lang={lang}";
+            Map<String, Object> data = new HashMap<>();
+            data.put("access_token", accessToken);
+            data.put("openid", openId);
+            data.put("lang", AiLangType.zh_CN.getCode());
 
-        String url = "https://api.weixin.qq.com/cgi-bin/user/info";
-        Map<String, Object> data = new HashMap<>();
-        data.put("access_token", accessToken);
-        data.put("openid", openId);
-        data.put("lang", AiLangType.zh_CN.getCode());
+            JSONObject resJson = HttpConnectionUtils.get(url, data);
 
-        JSONObject resJson = HttpConnectionUtils.get(url, data);
+            wechatUser = WechatUser.fromJson(resJson.toString());
+        } catch (WxErrorException e) {
+            e.printStackTrace();
+            log.error("Try get token has error!", e);
+        }
 
-        return WechatUser.fromJson(resJson.toString());
+        return wechatUser;
+
     }
 
     @Override
@@ -138,34 +156,114 @@ public class WechatUserServiceImpl implements WechatUserService {
          *    ]
          * }
          */
-        String accessToken = accessTokenService.getToken();
-
-        String url = "https://api.weixin.qq.com/cgi-bin/user/info/batchget?access_token=" + accessToken;
-
-        JSONObject postJson = new JSONObject();
-        JSONArray userJsonArray = new JSONArray();
-        for (String openId : openIdList) {
-            JSONObject json = new JSONObject();
-            json.put("openid", openId);
-            json.put("lang", AiLangType.zh_CN.getCode());
-
-            userJsonArray.add(json);
-        }
-        postJson.put("user_list", userJsonArray);
-
-        JSONObject resJson = HttpConnectionUtils.post(url, postJson);
-
         List<WechatUser> wechatUserList = new ArrayList<>();
-        JSONArray json = resJson.getJSONArray("user_info_list");
 
-        if (json.size() > 0) {
-            for (int i = 0; i < json.size(); i++) {
-                JSONObject job = json.getJSONObject(i);
-                WechatUser user = WechatUser.fromJson(resJson.toString());
-                wechatUserList.add(user);
+        String accessToken = null;
+        try {
+            accessToken = baseAccessTokenService.getToken();
+            String url = "https://api.weixin.qq.com/cgi-bin/user/info/batchget?access_token=" + accessToken;
+
+            JSONObject postJson = new JSONObject();
+            JSONArray userJsonArray = new JSONArray();
+            for (String openId : openIdList) {
+                JSONObject json = new JSONObject();
+                json.put("openid", openId);
+                json.put("lang", AiLangType.zh_CN.getCode());
+
+                userJsonArray.add(json);
             }
+            postJson.put("user_list", userJsonArray);
+
+            JSONObject resJson = HttpConnectionUtils.post(url, postJson);
+
+            JSONArray json = resJson.getJSONArray("user_info_list");
+
+            if (json.size() > 0) {
+                for (int i = 0; i < json.size(); i++) {
+                    JSONObject job = json.getJSONObject(i);
+                    WechatUser user = WechatUser.fromJson(resJson.toString());
+                    wechatUserList.add(user);
+                }
+            }
+        } catch (WxErrorException e) {
+            e.printStackTrace();
+            log.error("Try get token has error!", e);
         }
 
         return wechatUserList;
     }
+
+    @Override
+    public boolean handleSubscribe(Map<String, String> msgMap) {
+        String eventKey = msgMap.get("EventKey");
+        if (eventKey.startsWith("qrscene")) {
+//            respContent = "成功关注，并且您已扫描带参数二维码！ sceneId : " + eventKey.substring(8, eventKey.length());
+        }
+
+        String openId = msgMap.get("FromUserName");
+        WechatUser userInfo = getUserInfo(openId);
+        Assert.notNull(userInfo, "userinfo shold not null");
+        WechatUser userInDB = getUserInfoFromDB(openId);
+        if (userInDB != null) {
+            userInfo.setId(userInDB.getId());
+        }
+        saveInDB(userInfo);
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean handleUnSubscribe(Map<String, String> msgMap) {
+        String openId = msgMap.get("FromUserName");
+        WechatUser user = getUserInfoFromDB(openId);
+        if (user != null) {
+            user.setSubscribe(false);
+            user.setUnSubscribeTime(String.valueOf(System.currentTimeMillis()));
+            saveInDB(user);
+        }
+        return true;
+    }
+
+    private static final String OAUTH2_ACCESS_TOKEN_KEY = "wechat:accessToken:";
+    private static final int TIME_DIFFERENCE_LOSE = 60; //秒
+
+    @Override
+    public Oauth2AccessToken getOauth2AccessTokenByCode(String code) throws WxErrorException {
+        String key = OAUTH2_ACCESS_TOKEN_KEY + code;
+
+        boolean hasKey = redisUtil.hasKey(key);
+        if (hasKey) {
+            return Oauth2AccessToken.fromJson((String) redisUtil.get(key));
+        }
+
+        String OAUTH2_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={appid}&secret={secret}&code={code}&grant_type=authorization_code";
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", code);
+        data.put("appid", appId);
+        data.put("secret", secret);
+
+        JSONObject resJson = HttpConnectionUtils.get(OAUTH2_ACCESS_TOKEN_URL, data);
+
+        WxError error = WxError.fromJson(resJson);
+        if (error.getErrCode() != 0) {
+            throw new WxErrorException(error);
+        }
+
+        saveOauth2AccessToken(code, resJson);
+        return Oauth2AccessToken.fromJson(resJson.toString());
+    }
+
+
+    private void saveOauth2AccessToken(String code, JSONObject tokenJson) {
+        String key = OAUTH2_ACCESS_TOKEN_KEY + code;
+        boolean hasKey = redisUtil.hasKey(key);
+        if (hasKey) {
+            log.warn("the key " + key + " already exists, overwrite it .");
+        }
+        int expiresIn = tokenJson.getInteger("expires_in");
+
+        redisUtil.set(key, tokenJson.toString(), expiresIn - TIME_DIFFERENCE_LOSE);
+    }
+
 }

@@ -6,6 +6,7 @@ import com.thoughtworks.xstream.core.util.QuickWriter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
+import lombok.extern.slf4j.Slf4j;
 import net.joywise.wechat.server.bean.wechat.TextMessage;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -22,6 +23,7 @@ import java.util.Map;
 /**
  * @Description: 封装微信消息类型，有一个解析xml格式的工具
  */
+@Slf4j
 @Component
 public class WeixinMessageUtil {
 
@@ -163,7 +165,7 @@ public class WeixinMessageUtil {
         // 释放资源
         inputStream.close();
         inputStream = null;
-        System.out.println("---------xml转换为map-----:" + map);
+        log.debug("---------xml转换为map-----:" + map);
         return map;
     }
 

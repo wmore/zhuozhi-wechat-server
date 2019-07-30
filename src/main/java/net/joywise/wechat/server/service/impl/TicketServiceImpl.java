@@ -46,8 +46,7 @@ public class TicketServiceImpl implements TicketService {
         if (hasKey) {
             log.warn("the key " + ticketKey + " already exists, overwrite it .");
         }
-        redisUtil.set(ticketKey, ticket);
-        redisUtil.expire(ticket, expiresIn - TIME_DIFFERENCE_LOSE);
+        redisUtil.set(ticketKey, ticket, expiresIn - TIME_DIFFERENCE_LOSE);
     }
 
     @Override
@@ -58,7 +57,7 @@ public class TicketServiceImpl implements TicketService {
         if (hasKey) {
             return (String) redisUtil.get(ticketKey);
         }
-        String jsapi_ticket_url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket";
+        String jsapi_ticket_url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token={access_token}&type={type}";
 
         Map<String, Object> data = new HashMap<>();
         data.put("access_token", accessToken);

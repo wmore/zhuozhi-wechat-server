@@ -117,25 +117,22 @@ public class MsgServiceImpl implements MsgService {
 
                 // 事件类型
                 String eventType = map.get("Event");
-                System.out.println("eventType------>" + eventType);
                 // 关注
                 if (eventType.equals(weixinMessageUtil.EVENT_TYPE_SUBSCRIBE)) {
 //                    respMessage = weixinMessageModelUtil.followResponseMessageModel(weixinMessageInfo);
                     String eventKey = map.get("EventKey");
 //                    if (eventKey.startsWith("qrscene")) {
 //                        respContent = "成功关注，并且您已扫描带参数二维码！ sceneId : " + eventKey.substring(8, eventKey.length());
-                        textMessage.setContent(respContent);
-                        respMessage = weixinMessageUtil.textMessageToXml(textMessage);
+                    textMessage.setContent(respContent);
+                    respMessage = weixinMessageUtil.textMessageToXml(textMessage);
 
-                        String openId = map.get("FromUserName");
-                        WechatUser user = wechatUserService.getUserInfo(openId);
-                        wechatUserService.saveInDB(user);
-
+                    wechatUserService.handleSubscribe(map);
 //                    }
                 }
                 // 取消关注
                 else if (eventType.equals(weixinMessageUtil.EVENT_TYPE_UNSUBSCRIBE)) {
 //                    weixinMessageModelUtil.cancelAttention(fromUserName);
+                    wechatUserService.handleUnSubscribe(map);
                 }
                 // 扫描带参数二维码
                 else if (eventType.equals(weixinMessageUtil.EVENT_TYPE_SCAN)) {
