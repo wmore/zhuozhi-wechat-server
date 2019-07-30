@@ -51,16 +51,12 @@ public class SmartUser {
     @Column(length = 20, nullable = false)
     private String name;
 
-    // 密码
-    @JsonIgnore
-    @Size(max=100,message="密码长度过长")
-    @Column(length = 100, nullable = false)
-    private String password;
-
     // 用户类型 0--学生 1--教师 2--平台用户 3--超级管理员
     @Column(nullable = false)
     private Integer userType;
 
     public SmartUser() {
     }
+
+
 }

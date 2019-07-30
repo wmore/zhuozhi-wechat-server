@@ -3,11 +3,13 @@ package net.joywise.wechat.server.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import net.joywise.wechat.server.bean.db.SmartUser;
 import net.joywise.wechat.server.bean.wechat.Oauth2AccessToken;
 import net.joywise.wechat.server.error.WxErrorException;
 import net.joywise.wechat.server.service.WechatUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,10 +34,10 @@ public class UserController {
     private WechatUserService wechatUserService;
 
 
-    @RequestMapping(value = "/binding", method = RequestMethod.GET)
-    public String bingding() {
+    @RequestMapping(value = "/binding", method = RequestMethod.POST)
+    public String bingding(@RequestBody SmartUser smartUser) {
 
-        return "bingding";
+        return smartUser.toString();
     }
 
     @RequestMapping(value = "/appid", method = RequestMethod.GET)
