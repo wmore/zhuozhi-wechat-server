@@ -2,6 +2,7 @@ package net.joywise.wechat.server.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import net.joywise.wechat.server.constant.WX_URL;
 import net.joywise.wechat.server.error.WxError;
 import net.joywise.wechat.server.error.WxErrorException;
 import net.joywise.wechat.server.service.BaseAccessTokenService;
@@ -60,15 +61,13 @@ public class BaseAccessTokenServiceImpl implements BaseAccessTokenService {
 
         accessTokenLock.lock();
         try {
-            String url = "https://api.weixin.qq.com/cgi-bin/token?grant_type={grant_type}&appid={appid}&secret={secret}";
-
             Map<String, Object> data = new HashMap<>();
             data.put("grant_type", "client_credential");
             data.put("appid", appId);
             data.put("secret", appSecert);
 
-            JSONObject response = HttpConnectionUtils.get(url, data);
-            log.debug("url:" + url + "; params : " + data + " ;response: " + response);
+            JSONObject response = HttpConnectionUtils.get(WX_URL.URL_GET_TOKEN, data);
+            log.debug("url:" + WX_URL.URL_GET_TOKEN + "; params : " + data + " ;response: " + response);
 
             WxError error = WxError.fromJson(response);
             if (error.getErrCode() != 0) {

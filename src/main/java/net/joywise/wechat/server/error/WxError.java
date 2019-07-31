@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 public class WxError implements Serializable {
@@ -27,6 +29,15 @@ public class WxError implements Serializable {
     public static WxError fromJson(JSONObject json) {
         WxError wxError = JSON.toJavaObject(json, WxError.class);
         return wxError;
+    }
+
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("errCode", this.errCode);
+        map.put("errMsg", this.errMsg);
+
+        return map;
     }
 
 }

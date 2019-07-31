@@ -1,11 +1,9 @@
 package net.joywise.wechat.server.bean.db;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 /**
  * @Title: SmartUser
@@ -19,37 +17,27 @@ import javax.validation.constraints.Size;
 @Entity
 @Table(name = "t_smart_user", uniqueConstraints = {@UniqueConstraint(columnNames = "openId")})
 public class SmartUser {
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
 
     private String openId;
 
+    @NotNull(message = "用户id不能为空")
     private Long userId;
 
     //所属学校
+    @NotNull(message = "机构id不能为空")
     private Long schoolId;
 
     // 手机号
     @Column(length = 11)
     private String telephoneNumber;
 
-    //邮箱
-    @Column(length = 50)
-    private String email;
-
     //用户名
-    @Column(length=20)
-    private String userName;
-
-    // 身份证号码
-    @NotNull(message = "身份证号码不能为空")
-    @Column(length = 18, nullable = false, unique = true)
-    private String idNumber;
-
-    // 姓名
-    @NotNull(message = "姓名不能为空")
     @Column(length = 20, nullable = false)
-    private String name;
+    private String userName;
 
     // 用户类型 0--学生 1--教师 2--平台用户 3--超级管理员
     @Column(nullable = false)

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import net.joywise.wechat.server.bean.db.WechatUser;
 import net.joywise.wechat.server.bean.wechat.Oauth2AccessToken;
+import net.joywise.wechat.server.constant.WX_URL;
 import net.joywise.wechat.server.dao.WechatUserDao;
 import net.joywise.wechat.server.enums.AiLangType;
 import net.joywise.wechat.server.error.WxError;
@@ -87,13 +88,12 @@ public class WechatUserServiceImpl implements WechatUserService {
         String accessToken = null;
         try {
             accessToken = baseAccessTokenService.getToken();
-            String url = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={access_token}&openid={openid}&lang={lang}";
             Map<String, Object> data = new HashMap<>();
             data.put("access_token", accessToken);
             data.put("openid", openId);
             data.put("lang", AiLangType.zh_CN.getCode());
 
-            JSONObject resJson = HttpConnectionUtils.get(url, data);
+            JSONObject resJson = HttpConnectionUtils.get(WX_URL.URL_GET_USER_INFO, data);
 
             wechatUser = WechatUser.fromJson(resJson.toString());
         } catch (WxErrorException e) {
@@ -161,7 +161,7 @@ public class WechatUserServiceImpl implements WechatUserService {
         String accessToken = null;
         try {
             accessToken = baseAccessTokenService.getToken();
-            String url = "https://api.weixin.qq.com/cgi-bin/user/info/batchget?access_token=" + accessToken;
+            String url = WX_URL.URL_BATCH_GET_USER_INFO.replace("{accessToken}", accessToken);
 
             JSONObject postJson = new JSONObject();
             JSONArray userJsonArray = new JSONArray();
@@ -214,6 +214,9 @@ public class WechatUserServiceImpl implements WechatUserService {
     @Override
     @Transactional
     public boolean handleUnSubscribe(Map<String, String> msgMap) {
+        /***
+         * 取消关注，不会删除 smart 用户的绑定关系
+         */
         String openId = msgMap.get("FromUserName");
         WechatUser user = getUserInfoFromDB(openId);
         if (user != null) {
@@ -236,14 +239,12 @@ public class WechatUserServiceImpl implements WechatUserService {
             return Oauth2AccessToken.fromJson((String) redisUtil.get(key));
         }
 
-        String OAUTH2_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={appid}&secret={secret}&code={code}&grant_type=authorization_code";
-
         Map<String, Object> data = new HashMap<>();
         data.put("code", code);
         data.put("appid", appId);
         data.put("secret", secret);
 
-        JSONObject resJson = HttpConnectionUtils.get(OAUTH2_ACCESS_TOKEN_URL, data);
+        JSONObject resJson = HttpConnectionUtils.get(WX_URL.URL_OAUTH2_ACCESS_TOKEN, data);
 
         WxError error = WxError.fromJson(resJson);
         if (error.getErrCode() != 0) {

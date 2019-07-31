@@ -5,6 +5,8 @@ import com.alibaba.fastjson.TypeReference;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 public class Oauth2AccessToken implements Serializable {
@@ -45,5 +47,17 @@ public class Oauth2AccessToken implements Serializable {
                 ", scope='" + scope + '\'' +
                 ", expiresIn=" + expiresIn +
                 '}';
+    }
+
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("accessToken", getAccessToken());
+        map.put("expiresIn", getExpiresIn());
+        map.put("openId", getOpenId());
+        map.put("refreshToken", getRefreshToken());
+        map.put("scope", getScope());
+
+        return map;
     }
 }

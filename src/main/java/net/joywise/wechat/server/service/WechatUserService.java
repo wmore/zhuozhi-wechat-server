@@ -1,5 +1,6 @@
 package net.joywise.wechat.server.service;
 
+import net.joywise.wechat.server.bean.db.SmartUser;
 import net.joywise.wechat.server.bean.db.WechatUser;
 import net.joywise.wechat.server.bean.wechat.Oauth2AccessToken;
 import net.joywise.wechat.server.error.WxErrorException;

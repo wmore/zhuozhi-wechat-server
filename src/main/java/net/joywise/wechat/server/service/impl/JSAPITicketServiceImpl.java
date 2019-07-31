@@ -2,8 +2,9 @@ package net.joywise.wechat.server.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import net.joywise.wechat.server.constant.WX_URL;
 import net.joywise.wechat.server.enums.TicketType;
-import net.joywise.wechat.server.service.TicketService;
+import net.joywise.wechat.server.service.JSAPITicketService;
 import net.joywise.wechat.server.util.HttpConnectionUtils;
 import net.joywise.wechat.server.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class TicketServiceImpl implements TicketService {
+public class JSAPITicketServiceImpl implements JSAPITicketService {
     @Autowired
     private RedisUtil redisUtil;
 
@@ -57,14 +58,13 @@ public class TicketServiceImpl implements TicketService {
         if (hasKey) {
             return (String) redisUtil.get(ticketKey);
         }
-        String jsapi_ticket_url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token={access_token}&type={type}";
 
         Map<String, Object> data = new HashMap<>();
         data.put("access_token", accessToken);
         data.put("type", ticketType.getCode());
 
-        JSONObject response = HttpConnectionUtils.get(jsapi_ticket_url, data);
-        log.debug("url:" + jsapi_ticket_url + "; params : " + data + " ;response: " + response);
+        JSONObject response = HttpConnectionUtils.get(WX_URL.URL_GET_JSAPI_TICKET, data);
+        log.debug("url:" + WX_URL.URL_GET_JSAPI_TICKET + "; params : " + data + " ;response: " + response);
 
         int errcode = response.getInteger("access_token");
         String errmsg = response.getString("errmsg");

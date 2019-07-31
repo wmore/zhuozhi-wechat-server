@@ -1,9 +1,11 @@
 package net.joywise.wechat.server.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import net.joywise.wechat.server.bean.db.SmartUser;
 import net.joywise.wechat.server.dao.SmartUserDao;
 import net.joywise.wechat.server.service.SmartUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -17,6 +19,8 @@ import java.util.List;
  * @company: shopin.net
  * @version: V1.0
  */
+@Slf4j
+@Service
 public class SmartUserServiceImpl implements SmartUserService {
 
     @Autowired
