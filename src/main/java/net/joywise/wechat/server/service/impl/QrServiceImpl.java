@@ -2,12 +2,15 @@ package net.joywise.wechat.server.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import lombok.extern.slf4j.Slf4j;
-import net.joywise.wechat.server.bean.wechat.QrCode;
+import net.joywise.wechat.server.bean.db.QrCode;
+import net.joywise.wechat.server.bean.db.WechatUser;
 import net.joywise.wechat.server.constant.WX_URL;
+import net.joywise.wechat.server.dao.QrcodeDao;
 import net.joywise.wechat.server.error.WxErrorException;
 import net.joywise.wechat.server.service.BaseAccessTokenService;
-import net.joywise.wechat.server.service.QrService;
+import net.joywise.wechat.server.service.QrcodeService;
 import net.joywise.wechat.server.util.HttpConnectionUtils;
 import net.joywise.wechat.server.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +28,13 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class QrServiceImpl implements QrService {
+public class QrServiceImpl implements QrcodeService {
 
     @Autowired
     private RedisUtil redisUtil;
+
+    @Autowired
+    private QrcodeDao qrcodeDao;
 
     @Autowired
     private BaseAccessTokenService baseAccessTokenService;
@@ -79,12 +85,9 @@ public class QrServiceImpl implements QrService {
 
     @Override
     public QrCode getQrTicketWithScene(String scene) {
-        String redisKey = QR_LIMIT_SCENE_KEY + scene;
 
-        boolean hasKey = redisUtil.hasKey(redisKey);
-        if (hasKey) {
-            String qrcodeVal = (String) redisUtil.get(redisKey);
-            QrCode qrCode = QrCode.fromJson(qrcodeVal);
+        QrCode qrCode = qrcodeDao.queryByScene(scene);
+        if (qrCode!=null){
             return qrCode;
         }
 
@@ -92,13 +95,15 @@ public class QrServiceImpl implements QrService {
             String accessToken = baseAccessTokenService.getToken();
             String url = WX_URL.URL_GET_QRCODE.replace("{accessToken}", accessToken);
 
-            String reqStr = QRCODE_PARAMS_LIMIT_WITH_SCENE_STR.replace("SCENESTR", String.valueOf(scene));
+            String reqStr = QRCODE_PARAMS_LIMIT_WITH_SCENE_STR.replace("SCENESTR", scene);
 
             JSONObject postJson = JSON.parseObject(reqStr);
 
             JSONObject resultJson = HttpConnectionUtils.post(url, postJson);
 
-            redisUtil.set(redisKey, resultJson.toString());
+            qrCode = JSON.parseObject(resultJson.toString(), new TypeReference<QrCode>() {
+            });
+            qrcodeDao.save(qrCode);
 
             return QrCode.fromJson(resultJson.toString());
         } catch (WxErrorException e) {
@@ -108,4 +113,10 @@ public class QrServiceImpl implements QrService {
 
         return null;
     }
+
+    @Override
+    public void saveInDB(QrCode qrCode) {
+        qrcodeDao.save(qrCode);
+    }
+
 }

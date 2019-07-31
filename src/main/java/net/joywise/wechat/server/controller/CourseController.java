@@ -1,10 +1,16 @@
 package net.joywise.wechat.server.controller;
 
 import io.swagger.annotations.Api;
+import net.joywise.wechat.server.bean.ServiceResult;
+import net.joywise.wechat.server.bean.db.CourseTeaching;
+import net.joywise.wechat.server.bean.db.QrCode;
+import net.joywise.wechat.server.bean.db.SmartUser;
+import net.joywise.wechat.server.service.CourseTeachingService;
 import net.joywise.wechat.server.service.MsgService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -27,22 +33,16 @@ import java.io.UnsupportedEncodingException;
 @RequestMapping("/course")
 public class CourseController {
     @Autowired
-    private MsgService msgService;
+    private CourseTeachingService courseTeachingService;
 
 
-    @RequestMapping(value = "/wx", method = RequestMethod.POST)
-    public String handlePublicMsg2(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+    @RequestMapping(value = "", method = RequestMethod.POST)
+    public ServiceResult save(@RequestBody CourseTeaching courseTeaching) {
+        ServiceResult result = new ServiceResult(true);
 
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        String respXml = msgService.handleWxMessage(request, response);
-        if (StringUtils.isEmpty(respXml)) {
-            System.out.println("-------------处理微信消息失败-----------------------");
-            return null;
-        } else {
-            System.out.println("----------返回微信消息处理结果-----------------------:" + respXml);
-            return respXml;
-        }
+        courseTeachingService.createNewCourse(courseTeaching);
 
+        return result;
     }
+
 }

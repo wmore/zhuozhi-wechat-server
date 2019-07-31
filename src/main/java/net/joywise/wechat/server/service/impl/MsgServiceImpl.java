@@ -121,8 +121,9 @@ public class MsgServiceImpl implements MsgService {
                 if (eventType.equals(weixinMessageUtil.EVENT_TYPE_SUBSCRIBE)) {
 //                    respMessage = weixinMessageModelUtil.followResponseMessageModel(weixinMessageInfo);
                     String eventKey = map.get("EventKey");
-//                    if (eventKey.startsWith("qrscene")) {
-//                        respContent = "成功关注，并且您已扫描带参数二维码！ sceneId : " + eventKey.substring(8, eventKey.length());
+                    if (eventKey.startsWith("qrscene")) {
+                        respContent = "成功关注，并且您已扫描带参数二维码！ sceneId : " + eventKey.substring(8, eventKey.length());
+                    }
                     textMessage.setContent(respContent);
                     respMessage = weixinMessageUtil.textMessageToXml(textMessage);
 
@@ -159,7 +160,9 @@ public class MsgServiceImpl implements MsgService {
                 }
 
             }
-        } catch (Exception e) {
+        } catch
+        (Exception
+                        e) {
             e.printStackTrace();
             System.err.println("系统出错");
             respMessage = null;

@@ -180,18 +180,18 @@ public class WeixinMessageUtil {
         return xstream.toXML(textMessage);
     }
 
-//    /**
-//     * @param newsMessage
-//     * @return xml
-//     * @Description: 图文消息对象转换成xml
-//     * @date 2016-12-01
-//     */
-//
-//    public String newsMessageToXml(NewsMessage newsMessage) {
-//        xstream.alias("xml", newsMessage.getClass());
-//        xstream.alias("item", new Article().getClass());
-//        return xstream.toXML(newsMessage);
-//    }
+    /**
+     * @param newsMessage
+     * @return xml
+     * @Description: 图文消息对象转换成xml
+     * @date 2016-12-01
+     */
+
+    public String newsMessageToXml(NewsMessage newsMessage) {
+        xstream.alias("xml", newsMessage.getClass());
+        xstream.alias("item", new Article().getClass());
+        return xstream.toXML(newsMessage);
+    }
 //
 //    /**
 //     * @param imageMessage

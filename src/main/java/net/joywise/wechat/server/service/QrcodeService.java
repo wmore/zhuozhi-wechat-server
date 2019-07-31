@@ -1,6 +1,6 @@
 package net.joywise.wechat.server.service;
 
-import net.joywise.wechat.server.bean.wechat.QrCode;
+import net.joywise.wechat.server.bean.db.QrCode;
 
 /**
  * @Title: JSAPITicketService
@@ -12,7 +12,7 @@ import net.joywise.wechat.server.bean.wechat.QrCode;
  * @company: shopin.net
  * @version: V1.0
  */
-public interface QrService {
+public interface QrcodeService {
 
     /***
      * 获取临时带参二维码
@@ -28,5 +28,6 @@ public interface QrService {
      */
     QrCode getQrTicketWithScene(String scene);
 
+    void saveInDB(QrCode qrCode);
 
 }

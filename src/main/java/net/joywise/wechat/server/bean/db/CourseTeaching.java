@@ -6,13 +6,13 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 /**
- *  @author: wyue
- *  @Date: 2019/7/31 18:41
- *  @Description:
- */ 
+ * @author: wyue
+ * @Date: 2019/7/31 18:41
+ * @Description:
+ */
 @Data
 @Entity
-@Table(name = "t_course_teaching", uniqueConstraints = {@UniqueConstraint(columnNames ={ "schoolId", "teachingId"})})
+@Table(name = "t_course_teaching", uniqueConstraints = {@UniqueConstraint(columnNames = {"schoolId", "teachingId"})})
 public class CourseTeaching {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,6 +61,10 @@ public class CourseTeaching {
 
     // 课程图片地址
     private String indexImgUrl;
+
+    @OneToOne
+    @JoinColumn(name = "qrcode_id")
+    private QrCode qrCode;
 
     public CourseTeaching() {
     }

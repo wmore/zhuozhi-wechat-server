@@ -2,9 +2,8 @@ package net.joywise.wechat.server.controller;
 
 import io.swagger.annotations.Api;
 import net.joywise.wechat.server.bean.ServiceResult;
-import net.joywise.wechat.server.bean.wechat.QrCode;
-import net.joywise.wechat.server.service.MsgService;
-import net.joywise.wechat.server.service.QrService;
+import net.joywise.wechat.server.bean.db.QrCode;
+import net.joywise.wechat.server.service.QrcodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/qrcode")
 public class QrcodeController {
     @Autowired
-    private QrService qrService;
+    private QrcodeService qrcodeService;
 
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
@@ -36,7 +35,7 @@ public class QrcodeController {
         if (expire_seconds == null){
             expire_seconds = 60;
         }
-        QrCode qrCode = qrService.getTempQrTicketWithScene(expire_seconds, scene_str);
+        QrCode qrCode = qrcodeService.getTempQrTicketWithScene(expire_seconds, scene_str);
         serviceResult.setData(qrCode);
         return serviceResult;
     }
@@ -46,7 +45,7 @@ public class QrcodeController {
     @ResponseBody
     public ServiceResult getQrCodeWithScene(String scene_str) {
         ServiceResult serviceResult = new ServiceResult(true);
-        QrCode qrCode = qrService.getQrTicketWithScene(scene_str);
+        QrCode qrCode = qrcodeService.getQrTicketWithScene(scene_str);
         serviceResult.setData(qrCode);
         return serviceResult;
     }
