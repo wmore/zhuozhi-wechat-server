@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,10 +38,11 @@ public class CourseController {
 
 
     @RequestMapping(value = "", method = RequestMethod.POST)
+    @ResponseBody
     public ServiceResult save(@RequestBody CourseTeaching courseTeaching) {
         ServiceResult result = new ServiceResult(true);
 
-        courseTeachingService.createNewCourse(courseTeaching);
+        result.setData(courseTeachingService.createNewCourse(courseTeaching));
 
         return result;
     }

@@ -1,4 +1,4 @@
-package net.joywise.wechat.server.bean.wechat;
+package net.joywise.wechat.server.bean.wechat.message;
 
 /**
  * @Description: 响应消息基类（公众账号→普通用户）
@@ -17,8 +17,6 @@ public class BaseMessage {
     private long CreateTime;
     //消息类型(text/music/news)
     private String MsgType;
-    //星标刚收到的消息
-    private int FuncFlag;
 
     public String getToUserName() {
         return ToUserName;
@@ -52,11 +50,4 @@ public class BaseMessage {
         MsgType = msgType;
     }
 
-    public int getFuncFlag() {
-        return FuncFlag;
-    }
-
-    public void setFuncFlag(int funcFlag) {
-        FuncFlag = funcFlag;
-    }
 }

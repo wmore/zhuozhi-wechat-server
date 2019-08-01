@@ -3,27 +3,31 @@ package net.joywise.wechat.server.service.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import net.joywise.wechat.server.bean.db.CourseTeaching;
 import net.joywise.wechat.server.bean.db.WechatUser;
 import net.joywise.wechat.server.bean.wechat.Oauth2AccessToken;
+import net.joywise.wechat.server.bean.wechat.message.News;
+import net.joywise.wechat.server.bean.wechat.message.NewsMessage;
+import net.joywise.wechat.server.bean.wechat.message.TextMessage;
 import net.joywise.wechat.server.constant.WX_URL;
 import net.joywise.wechat.server.dao.WechatUserDao;
 import net.joywise.wechat.server.enums.AiLangType;
 import net.joywise.wechat.server.error.WxError;
 import net.joywise.wechat.server.error.WxErrorException;
 import net.joywise.wechat.server.service.BaseAccessTokenService;
+import net.joywise.wechat.server.service.CourseTeachingService;
 import net.joywise.wechat.server.service.WechatUserService;
 import net.joywise.wechat.server.util.HttpConnectionUtils;
 import net.joywise.wechat.server.util.RedisUtil;
+import net.joywise.wechat.server.util.WeixinMessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -34,6 +38,9 @@ public class WechatUserServiceImpl implements WechatUserService {
 
     @Autowired
     private BaseAccessTokenService baseAccessTokenService;
+
+    @Autowired
+    private CourseTeachingService courseTeachingService;
 
     @Autowired
     private RedisUtil redisUtil;
@@ -194,21 +201,43 @@ public class WechatUserServiceImpl implements WechatUserService {
     }
 
     @Override
-    public boolean handleSubscribe(Map<String, String> msgMap) {
-        String eventKey = msgMap.get("EventKey");
-        if (eventKey.startsWith("qrscene")) {
-//            respContent = "成功关注，并且您已扫描带参数二维码！ sceneId : " + eventKey.substring(8, eventKey.length());
-        }
-
-        String openId = msgMap.get("FromUserName");
-        WechatUser userInfo = getUserInfo(openId);
+    public String handleSubscribe(Map<String, String> msgMap) {
+        String fromOpenId = msgMap.get("FromUserName");
+        WechatUser userInfo = getUserInfo(fromOpenId);
         Assert.notNull(userInfo, "userinfo shold not null");
-        WechatUser userInDB = getUserInfoFromDB(openId);
+        WechatUser userInDB = getUserInfoFromDB(fromOpenId);
         if (userInDB != null) {
             userInfo.setId(userInDB.getId());
         }
         saveInDB(userInfo);
-        return true;
+
+        return handleScanQrcode(msgMap);
+    }
+
+    @Override
+    public String handleScanQrcode(Map<String, String> msgMap) {
+        String fromOpenId = msgMap.get("FromUserName");
+        String toOpenId = msgMap.get("ToUserName");
+
+        if (msgMap.containsKey("EventKey") || !StringUtils.isEmpty(msgMap.containsKey("EventKey"))) {
+            String eventKey = msgMap.get("EventKey");
+            String sceneStr = eventKey;
+
+            //if first subscribe, enventkey is  qrscene_xxxx. if not , eventkey is  xxxx, no include qrscene.
+            if (eventKey.startsWith("qrscene")) {
+                sceneStr = eventKey.replace("qrscene_", "");
+            }
+
+            if (!StringUtils.isEmpty(sceneStr) && sceneStr.split("_").length > 1) {
+                long schoolId = Long.parseLong(sceneStr.split("_")[0]);
+                long snapshotId = Long.parseLong(sceneStr.split("_")[1]);
+                CourseTeaching courseTeaching = courseTeachingService.queryBySnapshotId(snapshotId, schoolId);
+                return initNewsMessage(toOpenId, fromOpenId, courseTeaching);
+            }
+        }
+
+        return initTextMessage(toOpenId, fromOpenId, "感谢关注卓智智课堂公众号");
+
     }
 
     @Override
@@ -267,4 +296,51 @@ public class WechatUserServiceImpl implements WechatUserService {
         redisUtil.set(key, tokenJson.toString(), expiresIn - TIME_DIFFERENCE_LOSE);
     }
 
+    /***
+     * 新建文本消息
+     * @param fromUserName
+     * @param toUserName
+     * @param respContent
+     * @return
+     */
+    private String initTextMessage(String fromUserName, String toUserName, String respContent) {
+        // 默认回复文本消息
+        TextMessage textMessage = new TextMessage();
+        textMessage.setToUserName(fromUserName);
+        textMessage.setFromUserName(toUserName);
+        textMessage.setCreateTime(new Date().getTime());
+        textMessage.setMsgType(WeixinMessageUtil.RESP_MESSAGE_TYPE_TEXT);
+        textMessage.setContent(respContent);
+        return WeixinMessageUtil.textMessageToXml(textMessage);
+    }
+
+    /***
+     * 新建图文消息
+     * @param toUserName
+     * @param fromUserName
+     * @param courseTeaching
+     * @return
+     */
+    private String initNewsMessage(String toUserName, String fromUserName, CourseTeaching courseTeaching) {
+        List<News> newsList = new ArrayList<>();
+        //图文消息实体
+        NewsMessage newsMessage = new NewsMessage();
+        //图文消息的内容实体
+        News news = new News();
+        news.setTitle(courseTeaching.getCourseName());
+        news.setDescription(courseTeaching.getCourseName() + "二维条码/二维码（2-dimensional bar code）是用某种特定的几何图形按一定规律在平面（二维方向上）分布的黑白相间的图形记录数据符号信息的；在代码编制上巧妙地利用构成计算机内部逻辑基础的“0”、“1”比特流的概念，使用若干个与二进制相对应的几何形体来表示文字数值信息，通过图象输入设备或光电扫描设备自动识读以实现信息自动处理：它具有条码技术的一些共性：每种码制有其特定的字符集；每个字符占有一定的宽度；具有一定的校验功能等。同时还具有对不同行的信息自动识别功能、及处理图形旋转变化点。");
+        news.setPicUrl(courseTeaching.getIndexImgUrl());//需要替换本地服务器图片文件
+        news.setUrl(courseTeaching.getLessonUrl());
+        newsList.add(news);
+
+        newsMessage.setFromUserName(toUserName);
+        newsMessage.setToUserName(fromUserName);
+        newsMessage.setMsgType(WeixinMessageUtil.RESP_MESSAGE_TYPE_NEWS);
+        newsMessage.setCreateTime(new Date().getTime());
+        newsMessage.setArticles(newsList);
+        newsMessage.setArticleCount(newsList.size());
+        String message = WeixinMessageUtil.newsMessageToXml(newsMessage);
+//        log.debug(message);
+        return message;
+    }
 }

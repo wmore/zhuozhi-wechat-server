@@ -42,12 +42,13 @@ public class CourseTeachingServiceImpl implements CourseTeachingService {
 
     @Transactional
     @Override
-    public void createNewCourse(CourseTeaching courseTeaching) {
+    public CourseTeaching createNewCourse(CourseTeaching courseTeaching) {
+        // scene 格式为   schoolId_snapshotId
         String sceneStr = courseTeaching.getSchoolId() + "_" + courseTeaching.getSnapshotId();
         QrCode qrCode = qrcodeService.getQrTicketWithScene(sceneStr);
-
-        courseTeaching.setQrCode(qrCode);
-        courseTeachingDao.save(courseTeaching);
-
+        courseTeaching.setQrCodeId(qrCode.getId());
+        CourseTeaching course = courseTeachingDao.save(courseTeaching);
+        course.setQrCode(qrCode);
+        return course;
     }
 }

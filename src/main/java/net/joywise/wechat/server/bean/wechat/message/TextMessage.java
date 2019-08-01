@@ -1,5 +1,7 @@
-package net.joywise.wechat.server.bean.wechat;
+package net.joywise.wechat.server.bean.wechat.message;
 
+
+import net.joywise.wechat.server.bean.wechat.message.BaseMessage;
 
 public class TextMessage extends BaseMessage {
     //回复的消息内容

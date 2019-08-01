@@ -7,130 +7,128 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 import lombok.extern.slf4j.Slf4j;
-import net.joywise.wechat.server.bean.wechat.TextMessage;
+import net.joywise.wechat.server.bean.wechat.message.News;
+import net.joywise.wechat.server.bean.wechat.message.NewsMessage;
+import net.joywise.wechat.server.bean.wechat.message.TextMessage;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Description: 封装微信消息类型，有一个解析xml格式的工具
  */
 @Slf4j
-@Component
 public class WeixinMessageUtil {
 
     /**
      * 请求消息类型：文本
      */
-    public final String REQ_MESSAGE_TYPE_TEXT = "text";
+    public static final String REQ_MESSAGE_TYPE_TEXT = "text";
 
     /**
      * 请求消息类型：图片
      */
-    public final String REQ_MESSAGE_TYPE_IMAGE = "image";
+    public static final String REQ_MESSAGE_TYPE_IMAGE = "image";
 
     /**
      * 请求消息类型：语音
      */
-    public final String REQ_MESSAGE_TYPE_VOICE = "voice";
+    public static final String REQ_MESSAGE_TYPE_VOICE = "voice";
 
     /**
      * 请求消息类型：视频
      */
-    public final String REQ_MESSAGE_TYPE_VIDEO = "video";
+    public static final String REQ_MESSAGE_TYPE_VIDEO = "video";
 
     /**
      * 请求消息类型：链接
      */
-    public final String REQ_MESSAGE_TYPE_LINK = "link";
+    public static final String REQ_MESSAGE_TYPE_LINK = "link";
 
     /**
      * 请求消息类型：地理位置
      */
-    public final String REQ_MESSAGE_TYPE_LOCATION = "location";
+    public static final String REQ_MESSAGE_TYPE_LOCATION = "location";
 
     /**
      * 请求消息类型：小视频
      */
-    public final String REQ_MESSAGE_TYPE_SHORTVIDEO = "shortvideo";
+    public static final String REQ_MESSAGE_TYPE_SHORTVIDEO = "shortvideo";
 
     /**
      * 请求消息类型：事件推送
      */
-    public final String REQ_MESSAGE_TYPE_EVENT = "event";
+    public static final String REQ_MESSAGE_TYPE_EVENT = "event";
 
     /**
      * 返回消息类型：文本
      */
-    public final String RESP_MESSAGE_TYPE_TEXT = "text";
+    public static final String RESP_MESSAGE_TYPE_TEXT = "text";
 
     /**
      * 消息返回类型：图片
      */
-    public final String RESP_MESSAGE_TYPE_IMAGE = "image";
+    public static final String RESP_MESSAGE_TYPE_IMAGE = "image";
 
     /**
      * 消息返回类型:语音
      */
-    public final String RESP_MESSAGE_TYPE_VOICE = "voice";
+    public static final String RESP_MESSAGE_TYPE_VOICE = "voice";
 
     /**
      * 消息返回类型：音乐
      */
-    public final String RESP_MESSAGE_TYPE_MUSIC = "music";
+    public static final String RESP_MESSAGE_TYPE_MUSIC = "music";
 
     /**
      * 消息返回类型：图文
      */
-    public final String RESP_MESSAGE_TYPE_NEWS = "news";
+    public static final String RESP_MESSAGE_TYPE_NEWS = "news";
 
     /**
      * 消息返回类型：视频
      */
-    public final String RESP_MESSAGE_TYPE_VIDEO = "video";
+    public static final String RESP_MESSAGE_TYPE_VIDEO = "video";
 
     /**
      * 事件类型:订阅
      */
-    public final String EVENT_TYPE_SUBSCRIBE = "subscribe";
+    public static final String EVENT_TYPE_SUBSCRIBE = "subscribe";
 
     /**
      * 事件类型：取消订阅
      */
-    public final String EVENT_TYPE_UNSUBSCRIBE = "unsubscribe";
+    public static final String EVENT_TYPE_UNSUBSCRIBE = "unsubscribe";
 
     /**
      * 事件类型：scan(关注用户扫描带参二维码)
      */
-    public final String EVENT_TYPE_SCAN = "SCAN";
+    public static final String EVENT_TYPE_SCAN = "SCAN";
 
     /**
      * 事件类型：location(上报地理位置)
      */
-    public final String EVENT_TYPE_LOCATION = "LOCATION";
+    public static final String EVENT_TYPE_LOCATION = "LOCATION";
 
     /**
      * 事件类型：CLICK(点击菜单拉取消息)
      */
-    public final String EVENT_TYPE_CLICK = "CLICK";
+    public static final String EVENT_TYPE_CLICK = "CLICK";
 
     /**
      * 事件类型：VIEW(自定义菜单URl视图)
      */
-    public final String EVENT_TYPE_VIEW = "VIEW";
+    public static final String EVENT_TYPE_VIEW = "VIEW";
 
     /**
      * 事件类型：TEMPLATESENDJOBFINISH(模板消息送达情况提醒)
      */
-    public final String EVENT_TYPE_TEMPLATESENDJOBFINISH = "TEMPLATESENDJOBFINISH";
+    public static final String EVENT_TYPE_TEMPLATESENDJOBFINISH = "TEMPLATESENDJOBFINISH";
 
 
     /**
@@ -141,7 +139,7 @@ public class WeixinMessageUtil {
      * @Version: V1.00
      * @author:来日可期
      */
-    public Map<String, String> parseXml(HttpServletRequest request) throws Exception {
+    public static Map<String, String> parseXml(HttpServletRequest request) throws Exception {
 
         // 将解析结果存储在HashMap中
         Map<String, String> map = new HashMap<String, String>();
@@ -175,7 +173,7 @@ public class WeixinMessageUtil {
      * @Description: 文本消息对象转换成xml
      * @date 2016-12-01
      */
-    public String textMessageToXml(TextMessage textMessage) {
+    public static String textMessageToXml(TextMessage textMessage) {
         xstream.alias("xml", textMessage.getClass());
         return xstream.toXML(textMessage);
     }
@@ -187,9 +185,9 @@ public class WeixinMessageUtil {
      * @date 2016-12-01
      */
 
-    public String newsMessageToXml(NewsMessage newsMessage) {
+    public static String newsMessageToXml(NewsMessage newsMessage) {
         xstream.alias("xml", newsMessage.getClass());
-        xstream.alias("item", new Article().getClass());
+        xstream.alias("item", new News().getClass());
         return xstream.toXML(newsMessage);
     }
 //
@@ -242,7 +240,7 @@ public class WeixinMessageUtil {
      * 对象到xml的处理
      * 扩展xstream，使其支持CDATA块
      */
-    private XStream xstream = new XStream(new XppDriver() {
+    private static XStream xstream = new XStream(new XppDriver() {
         @Override
         public HierarchicalStreamWriter createWriter(Writer out) {
             return new PrettyPrintWriter(out) {
@@ -268,4 +266,6 @@ public class WeixinMessageUtil {
             };
         }
     });
+
+
 }

@@ -103,9 +103,10 @@ public class QrServiceImpl implements QrcodeService {
 
             qrCode = JSON.parseObject(resultJson.toString(), new TypeReference<QrCode>() {
             });
-            qrcodeDao.save(qrCode);
 
-            return QrCode.fromJson(resultJson.toString());
+            qrCode.setSceneStr(scene);
+            return  qrcodeDao.save(qrCode);
+
         } catch (WxErrorException e) {
             e.printStackTrace();
             log.error("Try get token has error!", e);

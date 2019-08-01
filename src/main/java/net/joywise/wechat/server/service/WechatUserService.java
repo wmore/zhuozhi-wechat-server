@@ -34,7 +34,14 @@ public interface WechatUserService {
      * 关注事件处理
      * @param msgMap
      */
-    boolean handleSubscribe(Map<String, String> msgMap);
+    String handleSubscribe(Map<String, String> msgMap);
+
+    /***
+     * 扫码事件
+     * @param msgMap
+     * @return
+     */
+    String handleScanQrcode(Map<String, String> msgMap);
 
     /***
      * 取消关注事件处理

@@ -26,6 +26,7 @@ import java.io.UnsupportedEncodingException;
  */
 @Api("一句话描述文档说明")
 @Controller
+@RestController
 public class MsgController {
     @Autowired
     private MsgService msgService;

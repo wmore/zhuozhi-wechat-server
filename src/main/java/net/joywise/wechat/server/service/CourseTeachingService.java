@@ -12,5 +12,5 @@ public interface CourseTeachingService {
 
     CourseTeaching queryByCourseId(long courseId, long schoolId);
 
-    void createNewCourse(CourseTeaching courseTeaching);
+    CourseTeaching createNewCourse(CourseTeaching courseTeaching);
 }

@@ -20,7 +20,8 @@ public class CourseTeaching {
     private Long id;
 
     //授课教师名称
-    private Long teacherName;
+    @NotNull(message = "teacherName能为空")
+    private String teacherName;
 
     //快照ID
     @NotNull(message = "snapshotId能为空")
@@ -62,10 +63,11 @@ public class CourseTeaching {
     // 课程图片地址
     private String indexImgUrl;
 
-    @OneToOne
-    @JoinColumn(name = "qrcode_id")
-    private QrCode qrCode;
+    private Long qrCodeId;
 
     public CourseTeaching() {
     }
+
+    @Transient
+    private QrCode qrCode;
 }
