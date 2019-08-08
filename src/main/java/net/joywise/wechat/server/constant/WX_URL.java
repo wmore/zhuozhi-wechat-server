@@ -42,4 +42,8 @@ public class WX_URL {
      */
     public static final  String URL_OAUTH2_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={appid}&secret={secret}&code={code}&grant_type=authorization_code";
 
+    /***
+     * 发送模板消息
+     */
+    public static final String URL_SEND_TEMPLATE_MESSAGE = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={accessToken}";
 }

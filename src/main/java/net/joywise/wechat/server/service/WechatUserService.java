@@ -44,6 +44,13 @@ public interface WechatUserService {
     String handleScanQrcode(Map<String, String> msgMap);
 
     /***
+     * 扫码事件，并回复模板消息
+     * @param msgMap
+     * @return
+     */
+     void handleScanQrcodeAndReplay(Map<String, String> msgMap);
+
+    /***
      * 取消关注事件处理
      * @param msgMap
      */

@@ -14,7 +14,7 @@ import java.util.Map;
  * @author longweier
  * @vesion 1.0
  */
-public class ServiceResult implements Serializable{
+public class ServiceResult<T> implements Serializable{
 	
 	private static final long serialVersionUID = 4730576638927219990L;
 	
@@ -27,7 +27,7 @@ public class ServiceResult implements Serializable{
 	
 	private Map<String,Object> property;
 	
-	private Object data;
+	private T data;
 	
 	public ServiceResult(){
 		this.success = true;
@@ -80,11 +80,11 @@ public class ServiceResult implements Serializable{
 		this.statusCode = statusCode;
 	}
 
-	public Object getData() {
+	public T getData() {
 		return data;
 	}
 
-	public void setData(Object data) {
+	public void setData(T data) {
 		this.data = data;
 	}
 }

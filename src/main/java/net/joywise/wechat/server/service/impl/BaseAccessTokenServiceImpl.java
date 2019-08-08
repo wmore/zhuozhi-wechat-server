@@ -2,6 +2,7 @@ package net.joywise.wechat.server.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import net.joywise.wechat.server.constant.CACHE_KEY;
 import net.joywise.wechat.server.constant.WX_URL;
 import net.joywise.wechat.server.error.WxError;
 import net.joywise.wechat.server.error.WxErrorException;
@@ -40,23 +41,22 @@ public class BaseAccessTokenServiceImpl implements BaseAccessTokenService {
     public String appSecert;//自己在微信测试平台设置的secret
 
 
-    private static final String ACCESS_TOKEN_KEY = "wechat:accessToken";
     private static final int TIME_DIFFERENCE_LOSE = 60; //秒
 
     protected Lock accessTokenLock = new ReentrantLock();
 
     public void save(String accessToken, int expiresIn) {
-        boolean hasKey = redisUtil.hasKey(ACCESS_TOKEN_KEY);
+        boolean hasKey = redisUtil.hasKey(CACHE_KEY.ACCESS_TOKEN_KEY);
         if (hasKey) {
-            log.warn("the key " + ACCESS_TOKEN_KEY + " already exists, overwrite it .");
+            log.warn("the key " + CACHE_KEY.ACCESS_TOKEN_KEY + " already exists, overwrite it .");
         }
-        redisUtil.set(ACCESS_TOKEN_KEY, accessToken, expiresIn - TIME_DIFFERENCE_LOSE);
+        redisUtil.set(CACHE_KEY.ACCESS_TOKEN_KEY, accessToken, expiresIn - TIME_DIFFERENCE_LOSE);
     }
 
     public String getToken() throws WxErrorException {
-        boolean hasKey = redisUtil.hasKey(ACCESS_TOKEN_KEY);
+        boolean hasKey = redisUtil.hasKey(CACHE_KEY.ACCESS_TOKEN_KEY);
         if (hasKey) {
-            return (String) redisUtil.get(ACCESS_TOKEN_KEY);
+            return (String) redisUtil.get(CACHE_KEY.ACCESS_TOKEN_KEY);
         }
 
         accessTokenLock.lock();

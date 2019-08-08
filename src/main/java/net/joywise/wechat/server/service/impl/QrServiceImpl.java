@@ -87,7 +87,7 @@ public class QrServiceImpl implements QrcodeService {
     public QrCode getQrTicketWithScene(String scene) {
 
         QrCode qrCode = qrcodeDao.queryByScene(scene);
-        if (qrCode!=null){
+        if (qrCode != null) {
             return qrCode;
         }
 
@@ -105,7 +105,7 @@ public class QrServiceImpl implements QrcodeService {
             });
 
             qrCode.setSceneStr(scene);
-            return  qrcodeDao.save(qrCode);
+            return qrcodeDao.save(qrCode);
 
         } catch (WxErrorException e) {
             e.printStackTrace();

@@ -1,5 +1,7 @@
 package net.joywise.wechat.server.service;
 
+import net.joywise.wechat.server.bean.db.CourseTeaching;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,4 +23,30 @@ public interface MsgService {
      * @return
      */
     String handleWxMessage(HttpServletRequest request, HttpServletResponse response);
+
+    /***
+     * 新建文字消息
+     * @param fromUserName
+     * @param toUserName
+     * @param respContent
+     * @return
+     */
+    String initTextMessage(String fromUserName, String toUserName, String respContent);
+
+    /***
+     * 新建图文消息
+     * @param toUserName
+     * @param fromUserName
+     * @param courseTeaching
+     * @return
+     */
+    String initNewsMessage(String toUserName, String fromUserName, CourseTeaching courseTeaching);
+
+    /***
+     * 新建模板消息
+     * @param toUserName
+     * @param courseTeaching
+     * @return
+     */
+    boolean sendTemplateMessage(String toUserName, CourseTeaching courseTeaching);
 }

@@ -1,4 +1,4 @@
-package net.joywise.wechat.server;
+package net.joywise.wechat.server.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -28,6 +28,17 @@ public class RedisUtil {
     private StringRedisTemplate redisTemplate;
 
 
+    /***
+     * 根据正则表达式查询key然后做删除
+     * @param keyPatten
+     */
+    public void delKeys(String keyPatten) {
+        Set<String> keys = redisTemplate.keys(keyPatten);
+        String[] keyArray=keys.toArray(new String[0]);
+        del(keyArray);
+    }
+
+
     /**
      * 指定缓存失效时间
      *

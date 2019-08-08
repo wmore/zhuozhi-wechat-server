@@ -15,7 +15,9 @@ import net.joywise.wechat.server.service.WechatUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
+import javax.websocket.server.PathParam;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +43,22 @@ public class UserController {
     @Autowired
     private SmartUserService smartUserService;
 
+    @ApiOperation("保存智课堂平台的用户信息")
+    @RequestMapping(value = "/{openId}", method = RequestMethod.GET)
+    public ServiceResult getUser(@PathParam(value = "openId") String openId) {
+        ServiceResult result = new ServiceResult(true);
+        SmartUser userExist = smartUserService.queryByOpenId(openId);
+        if (userExist != null) {
+            result.setSuccess(true);
+            result.setData(userExist);
+        } else {
+            result.setSuccess(false);
+            result.setMessage("user is null, need save!");
+        }
+        return result;
+    }
 
+    @ApiOperation("保存智课堂平台的用户信息")
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ServiceResult save(@RequestBody SmartUser smartUser) {
         ServiceResult result = new ServiceResult(true);
@@ -68,14 +85,13 @@ public class UserController {
      * @param state
      * @return
      */
-    @ApiOperation("接口描述")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "code", value = "code作为换取access_token的票据，每次用户授权带上的code将不一样，code只能使用一次，5分钟未被使用自动过期。须通过授权页面同意授权，获取code", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "state", value = "重定向后会带上state参数，开发者可以填写a-zA-Z0-9的参数值，最多128字节", required = false, dataType = "String", paramType = "query")
-    })
+    @ApiOperation("获取用户oauth的token")
+    @ApiImplicitParam(name = "code",
+            value = "code作为换取access_token的票据，每次用户授权带上的code将不一样，code只能使用一次，5分钟未被使用自动过期。须通过授权页面同意授权，获取code",
+            required = true, dataType = "String", paramType = "query")
     @RequestMapping(value = "/oauth2", method = RequestMethod.GET)
     @ResponseBody
-    public ServiceResult doOauth2(@RequestParam String code, String state) {
+    public ServiceResult<Oauth2AccessToken> doOauth2(@RequestParam String code, @ApiIgnore String state) {
         ServiceResult result = new ServiceResult(false);
 
         try {
@@ -83,7 +99,7 @@ public class UserController {
             log.debug("Oauth2AccessToken is : " + token.toString());
             result.setSuccess(true);
 
-            result.setData(token.toMap());
+            result.setData(token);
             return result;
         } catch (WxErrorException e) {
             e.printStackTrace();

@@ -1,6 +1,7 @@
 package net.joywise.wechat.server.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import net.joywise.wechat.server.bean.ServiceResult;
 import net.joywise.wechat.server.bean.db.CourseTeaching;
 import net.joywise.wechat.server.bean.db.QrCode;
@@ -29,7 +30,7 @@ import java.io.UnsupportedEncodingException;
  * @company: shopin.net
  * @version: V1.0
  */
-@Api("一句话描述文档说明")
+@Api("课程信息的接口")
 @Controller
 @RequestMapping("/course")
 public class CourseController {
@@ -37,9 +38,10 @@ public class CourseController {
     private CourseTeachingService courseTeachingService;
 
 
+    @ApiOperation(value="添加课程信息")
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
-    public ServiceResult save(@RequestBody CourseTeaching courseTeaching) {
+    public ServiceResult<CourseTeaching> save(@RequestBody CourseTeaching courseTeaching) {
         ServiceResult result = new ServiceResult(true);
 
         result.setData(courseTeachingService.createNewCourse(courseTeaching));

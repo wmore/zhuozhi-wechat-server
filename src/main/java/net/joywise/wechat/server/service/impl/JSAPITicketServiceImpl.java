@@ -2,6 +2,7 @@ package net.joywise.wechat.server.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import net.joywise.wechat.server.constant.CACHE_KEY;
 import net.joywise.wechat.server.constant.WX_URL;
 import net.joywise.wechat.server.enums.TicketType;
 import net.joywise.wechat.server.service.JSAPITicketService;
@@ -37,12 +38,11 @@ public class JSAPITicketServiceImpl implements JSAPITicketService {
     public String appSecert;//自己在微信测试平台设置的secret
 
 
-    private static final String TICKET_KEY = "wechat:ticket:";
     private static final int TIME_DIFFERENCE_LOSE = 60; //秒
 
     @Override
     public void save(String ticket, int expiresIn, TicketType ticketType) {
-        String ticketKey = TICKET_KEY + ticketType.getCode();
+        String ticketKey = CACHE_KEY.TICKET_KEY_PREFIX + ticketType.getCode();
         boolean hasKey = redisUtil.hasKey(ticketKey);
         if (hasKey) {
             log.warn("the key " + ticketKey + " already exists, overwrite it .");
@@ -52,7 +52,7 @@ public class JSAPITicketServiceImpl implements JSAPITicketService {
 
     @Override
     public String getTicket(String accessToken, TicketType ticketType) {
-        String ticketKey = TICKET_KEY + ticketType.getCode();
+        String ticketKey = CACHE_KEY.TICKET_KEY_PREFIX + ticketType.getCode();
 
         boolean hasKey = redisUtil.hasKey(ticketKey);
         if (hasKey) {
