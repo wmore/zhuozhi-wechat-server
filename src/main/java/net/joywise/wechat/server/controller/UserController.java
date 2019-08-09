@@ -43,7 +43,7 @@ public class UserController {
     @Autowired
     private SmartUserService smartUserService;
 
-    @ApiOperation("保存智课堂平台的用户信息")
+    @ApiOperation("获取智课堂平台的用户信息")
     @RequestMapping(value = "/{openId}", method = RequestMethod.GET)
     public ServiceResult getUser(@PathParam(value = "openId") String openId) {
         ServiceResult result = new ServiceResult(true);
@@ -67,7 +67,7 @@ public class UserController {
             result.setSuccess(false);
             result.setMessage("该用户已经存在，无需再次绑定！");
         } else {
-            smartUserService.saveInDB(smartUser);
+            smartUserService.bind(smartUser);
         }
         return result;
     }

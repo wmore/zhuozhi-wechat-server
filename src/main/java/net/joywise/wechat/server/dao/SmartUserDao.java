@@ -2,9 +2,12 @@ package net.joywise.wechat.server.dao;
 
 import net.joywise.wechat.server.bean.db.SmartUser;
 import net.joywise.wechat.server.bean.db.WechatUser;
+import net.joywise.wechat.server.bean.vo.SchoolVo;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 
 public interface SmartUserDao extends CrudRepository<SmartUser, Long> {

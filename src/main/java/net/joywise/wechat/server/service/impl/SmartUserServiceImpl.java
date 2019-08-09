@@ -2,6 +2,7 @@ package net.joywise.wechat.server.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import net.joywise.wechat.server.bean.db.SmartUser;
+import net.joywise.wechat.server.bean.vo.SchoolVo;
 import net.joywise.wechat.server.dao.SmartUserDao;
 import net.joywise.wechat.server.service.SmartUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,4 +59,18 @@ public class SmartUserServiceImpl implements SmartUserService {
             smartUserDao.delete(user);
         }
     }
+
+    @Override
+    public void bind(SmartUser smartUser) {
+
+        this.saveInDB(smartUser);
+    }
+
+    @Override
+    public void loginSmartPlatform(SmartUser smartUser) {
+        long schoolId = smartUser.getSchoolId();
+        // 获取school 信息
+    }
+
+
 }

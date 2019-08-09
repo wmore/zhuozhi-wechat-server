@@ -1,5 +1,6 @@
 package net.joywise.wechat.server.bean.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -45,6 +46,14 @@ public class SmartUser {
     @Column(length = 20, nullable = false)
     private String userName;
 
+    @JsonIgnore
+    @Column(nullable = false)
+    private String password;
+
+    // 智管理平台的token
+    @ApiModelProperty(value = "智管理平台的token")
+    private String smartToken;
+
     // 用户类型 0--学生 1--教师 2--平台用户 3--超级管理员
     @ApiModelProperty(value = "用户类型 0--学生 1--教师 2--平台用户 3--超级管理员", required = true)
     @Column(nullable = false)
@@ -52,6 +61,5 @@ public class SmartUser {
 
     public SmartUser() {
     }
-
 
 }
