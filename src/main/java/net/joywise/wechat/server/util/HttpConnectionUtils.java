@@ -9,7 +9,9 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -17,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -96,7 +99,7 @@ public class HttpConnectionUtils {
      * @Return
      * @Exception
      */
-    public static JSONObject post(final String url, MultiValueMap<String, String> formParms) {
+    public static JSONObject post(final String url, HashMap<String, String> formParms) {
 
         if (!StringUtils.isNotBlank(url)) {
             return null;
@@ -104,17 +107,16 @@ public class HttpConnectionUtils {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formParms, headers);
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        HttpEntity requestEntity = new HttpEntity(headers);
+
         RestTemplate restTemplate = getRestTemplate();
-
-        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class, formParms);
         Integer code = response.getStatusCode().value();
-        if (HTTP_CODE_NORMAL != code) {
-
+        if (200 != code) {
             //错误返回值处理
-
         }
+
         JSONObject body = JSONObject.parseObject(response.getBody());
         log.info("body:{}", body);
         return body;

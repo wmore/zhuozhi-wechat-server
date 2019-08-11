@@ -139,7 +139,7 @@ public class MsgServiceImpl implements MsgService {
                 else if (eventType.equals(WeixinMessageUtil.EVENT_TYPE_SCAN)) {
                     System.out.println("扫描带参数二维码! sceneId : " + map.get("EventKey"));
 //                    respMessage = wechatUserService.handleScanQrcode(map);
-                    wechatUserService.handleScanQrcodeAndReplay(map);
+                    wechatUserService.handleSubscribe(map);
                 }
                 // 上报地理位置
                 else if (eventType.equals(WeixinMessageUtil.EVENT_TYPE_LOCATION)) {

@@ -1,5 +1,7 @@
 package net.joywise.wechat.server.constant;
 
+import org.springframework.beans.factory.annotation.Value;
+
 /**
  * @Title: WX_URL
  * @Description: 其他平台的url
@@ -12,15 +14,20 @@ package net.joywise.wechat.server.constant;
  */
 public class PLATFORM_URL {
 
-    public static final String DOMAIN_CLOUD_BASE =  "http://localhost:8080/ROOT/";
+
+    @Value("${com.constant.domain.cloud-base}")
+    public static String DOMAIN_CLOUD_BASE;
+
+    public static final String URL_HTTP_PREFIX = "http://";
+
     /***
      * 获取学校机构信息
      */
-    public static final String URL_GET_SCHOOL_INFO = "school/{school_id}";
+    public static final String URL_GET_SCHOOL_INFO = "/school/config_wechat/{school_id}";
 
-    public static final String URL_LOGIN_SCHOOL_PASSPORT = "passport/login";
+    public static final String URL_LOGIN_SCHOOL_PASSPORT = "/passport/login?username={username}&password={password}";
 
-    public static final String URL_LOGIN_SCHOOL_PASSPORT_BY_TOKEN = "passport/loginByToken";
+    public static final String URL_LOGIN_SCHOOL_PASSPORT_BY_TOKEN = "/passport/loginByToken?token={token}";
 
 
 }

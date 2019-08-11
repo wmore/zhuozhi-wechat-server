@@ -18,7 +18,7 @@ public interface SmartUserService {
 
     void deleteByOpenId(String openId);
 
-    void bind(SmartUser smartUser);
+    SmartUser bind(SmartUser smartUser);
 
     SmartUser loginSmartPlatform(SmartUser smartUser);
 

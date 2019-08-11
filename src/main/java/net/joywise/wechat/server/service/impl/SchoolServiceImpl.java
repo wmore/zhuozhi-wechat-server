@@ -30,8 +30,17 @@ public class SchoolServiceImpl implements SchoolService {
 
     @Override
     public SchoolVo getSchoolById(long schoolId) {
-        String url = PLATFORM_URL.URL_GET_SCHOOL_INFO.replace("{school_id}", String.valueOf(schoolId));
-        JSONObject resultJson = HttpConnectionUtils.get(PLATFORM_URL.DOMAIN_CLOUD_BASE + url, null);
+//        String url = PLATFORM_URL.URL_GET_SCHOOL_INFO.replace("{school_id}", String.valueOf(schoolId));
+//        JSONObject resultJson = HttpConnectionUtils.get(PLATFORM_URL.DOMAIN_CLOUD_BASE + url, null);
+
+        JSONObject resultJson = new JSONObject();
+        resultJson.put("schoolId", 93);
+        resultJson.put("schoolName", "福建师范大学");
+        resultJson.put("schoolType", 1);
+        resultJson.put("isWechatUsed", true);
+        resultJson.put("domainAddressMapper", "10.10.23.31");
+        resultJson.put("socketIOAddressMapper", "10.10.23.31");
+
         SchoolVo schoolVo = JSON.toJavaObject(resultJson, SchoolVo.class);
 
         return schoolVo;

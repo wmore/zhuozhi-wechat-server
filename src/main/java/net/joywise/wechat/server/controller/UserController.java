@@ -17,7 +17,10 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.websocket.server.PathParam;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +48,7 @@ public class UserController {
 
     @ApiOperation("获取智课堂平台的用户信息")
     @RequestMapping(value = "/{openId}", method = RequestMethod.GET)
-    public ServiceResult getUser(@PathParam(value = "openId") String openId) {
+    public ServiceResult getUser(@PathVariable String openId) {
         ServiceResult result = new ServiceResult(true);
         SmartUser userExist = smartUserService.getUserInfo(openId);
         if (userExist != null) {
@@ -53,7 +56,7 @@ public class UserController {
             result.setData(userExist);
         } else {
             result.setSuccess(false);
-            result.setMessage("user is null, need save!");
+            result.setMessage("user is not exist, need save!");
         }
         return result;
     }
@@ -67,7 +70,16 @@ public class UserController {
             result.setSuccess(false);
             result.setMessage("该用户已经存在，无需再次绑定！");
         } else {
-            smartUserService.bind(smartUser);
+            try {
+                smartUser.setPassword(URLDecoder.decode(smartUser.getPassword(), "utf-8"));
+                SmartUser user = smartUserService.bind(smartUser);
+                result.setMessage("绑定成功！");
+                result.setData(user);
+            } catch (Exception e) {
+                result.setSuccess(false);
+                result.setMessage("绑定失败！");
+                e.printStackTrace();
+            }
         }
         return result;
     }

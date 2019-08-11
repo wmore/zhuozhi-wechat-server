@@ -19,6 +19,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +48,8 @@ public class SmartUserServiceImpl implements SmartUserService {
 
     @Autowired
     private RedisUtil redisUtil;
+
+    private static final long SMART_TOKEN_EXPIRES_IN = 24 * 60 * 30;
 
     @Override
     public void saveInDB(SmartUser smartUser) {
@@ -80,11 +85,12 @@ public class SmartUserServiceImpl implements SmartUserService {
     }
 
     @Override
-    public void bind(SmartUser smartUser) {
+    public SmartUser bind(SmartUser smartUser) {
         SmartUser user = loginSmartPlatform(smartUser);
         if (user != null) {
             this.saveInDB(smartUser);
         }
+        return user;
     }
 
     /***
@@ -109,22 +115,30 @@ public class SmartUserServiceImpl implements SmartUserService {
         }
 
         String smartToken = "";
+        boolean smartTokenIsValid = false;
+
         String smartTokenKey = CACHE_KEY.USER_SMART_TOKEN_KEY_PREFIX + smartUser.getOpenId();
         if (redisUtil.hasKey(smartTokenKey)) {
             smartToken = (String) redisUtil.get(smartTokenKey);
             JSONObject resultOfloginByToken = loginSmartPlatformByToken(school_smart_address, smartToken);
 
-            if (resultOfloginByToken.getInteger("status") == 1) {
+            if (resultOfloginByToken != null &&
+                    resultOfloginByToken.getInteger("status") == 1) {
+                smartTokenIsValid = true;
                 smartToken = resultOfloginByToken.getString("token");
             }
-            {
-                JSONObject resultOfloginByPwd = loginSmartPlatformByNameAndPwd(school_smart_address, smartUser.getUserName(), smartUser.getPassword());
-                int status = resultOfloginByPwd.getInteger("status");
-                if (status == 1) {
-                    smartToken = resultOfloginByToken.getString("token");
-                } else {
-                    throw new CommonException("登陆失败！smart平台返回状态码：" + status);
-                }
+        }
+
+        if (smartTokenIsValid == false) {
+            JSONObject resultOfloginByPwd = loginSmartPlatformByNameAndPwd(school_smart_address, smartUser.getUserName(), smartUser.getPassword());
+
+            if (resultOfloginByPwd != null &&
+                    resultOfloginByPwd.getInteger("status") == 1) {
+                smartToken = resultOfloginByPwd.getString("token");
+                //保存token到redis
+                redisUtil.set(smartTokenKey, smartToken, SMART_TOKEN_EXPIRES_IN);
+            } else {
+                throw new CommonException("登陆失败！smart平台返回：" + resultOfloginByPwd);
             }
         }
 
@@ -135,8 +149,8 @@ public class SmartUserServiceImpl implements SmartUserService {
     }
 
     private JSONObject loginSmartPlatformByToken(String school_smart_address, String smartToken) {
-        String loginUrl = school_smart_address + PLATFORM_URL.URL_LOGIN_SCHOOL_PASSPORT_BY_TOKEN;
-        MultiValueMap loginParms = new LinkedMultiValueMap();
+        String loginUrl = PLATFORM_URL.URL_HTTP_PREFIX + school_smart_address + PLATFORM_URL.URL_LOGIN_SCHOOL_PASSPORT_BY_TOKEN;
+        HashMap<String, String> loginParms = new HashMap<>();
         loginParms.put("token", smartToken);
 
         JSONObject resultJson = HttpConnectionUtils.post(loginUrl, loginParms);
@@ -151,13 +165,19 @@ public class SmartUserServiceImpl implements SmartUserService {
      * @return
      */
     private JSONObject loginSmartPlatformByNameAndPwd(String school_smart_address, String userName, String password) {
-        String loginUrl = school_smart_address + PLATFORM_URL.URL_LOGIN_SCHOOL_PASSPORT;
-        Map<String, Object> loginParms = new HashMap<>();
-        loginParms.put("username", userName);
-        loginParms.put("password", password);
 
-        JSONObject resultJson = HttpConnectionUtils.get(loginUrl, loginParms);
-        return resultJson;
+        try {
+            String loginUrl = PLATFORM_URL.URL_HTTP_PREFIX + school_smart_address + PLATFORM_URL.URL_LOGIN_SCHOOL_PASSPORT;
+            HashMap<String, String> loginParms = new HashMap<>();
+            loginParms.put("username", userName);
+            loginParms.put("password", URLEncoder.encode(password, "utf-8"));
+            JSONObject resultJson = HttpConnectionUtils.post(loginUrl, loginParms);
+            return resultJson;
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override

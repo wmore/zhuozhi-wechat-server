@@ -20,7 +20,7 @@ public class SchoolVo implements Serializable {
     /***
      * 机构域名
      */
-    private String domain;
+//    private String domain;
 
     /***
      * 机构类型  1--本科  2--高职  3--中职
@@ -44,14 +44,6 @@ public class SchoolVo implements Serializable {
     @Column(length = 100)
     private String socketIOAddressMapper;
 
-
-    public SchoolVo(Long schoolId, String schoolName, String domain, Integer schoolType, Boolean isWechatUsed, String domainAddressMapper, String socketIOAddressMapper) {
-        this.schoolId = schoolId;
-        this.schoolName = schoolName;
-        this.domain = domain;
-        this.schoolType = schoolType;
-        this.isWechatUsed = isWechatUsed;
-        this.domainAddressMapper = domainAddressMapper;
-        this.socketIOAddressMapper = socketIOAddressMapper;
+    public SchoolVo() {
     }
 }

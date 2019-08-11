@@ -1,6 +1,7 @@
 package net.joywise.wechat.server.bean.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
@@ -47,8 +48,8 @@ public class SmartUser {
     @Column(length = 20, nullable = false)
     private String userName;
 
-    @JsonIgnore
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     // 用户类型 0--学生 1--教师 2--平台用户 3--超级管理员
@@ -75,4 +76,13 @@ public class SmartUser {
     public SmartUser() {
     }
 
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
+
+    @JsonProperty
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

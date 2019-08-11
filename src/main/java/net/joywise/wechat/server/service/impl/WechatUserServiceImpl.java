@@ -209,16 +209,25 @@ public class WechatUserServiceImpl implements WechatUserService {
     @Override
     public String handleSubscribe(Map<String, String> msgMap) {
         String fromOpenId = msgMap.get("FromUserName");
-        WechatUser userInfo = getUserInfo(fromOpenId);
+        checkAndSaveWechatUser(fromOpenId);
+
+        handleScanQrcodeAndReplay(msgMap);
+        return null;
+    }
+
+    /***
+     * 确认微信账号是否存在，如果不存在则保存到数据库里
+     *
+     * @param openId
+     */
+    private void checkAndSaveWechatUser(String openId) {
+        WechatUser userInfo = getUserInfo(openId);
         Assert.notNull(userInfo, "userinfo shold not null");
-        WechatUser userInDB = getUserInfoFromDB(fromOpenId);
+        WechatUser userInDB = getUserInfoFromDB(openId);
         if (userInDB != null) {
             userInfo.setId(userInDB.getId());
         }
         saveInDB(userInfo);
-
-        handleScanQrcodeAndReplay(msgMap);
-        return null;
     }
 
     @Override
