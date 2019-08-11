@@ -1,15 +1,11 @@
 package net.joywise.wechat.server.util;
 
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -42,9 +38,9 @@ public class HttpConnectionUtils {
         ClientHttpRequestFactory factory = simpleClientHttpRequestFactory();
         RestTemplate template = new RestTemplate(factory);
         //解决中文乱码
-        StringHttpMessageConverter stringHttpMessageConverter=new StringHttpMessageConverter(Charset.forName("UTF-8"));
-        MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter=new MappingJackson2HttpMessageConverter();
-        List<HttpMessageConverter<?>> list=new ArrayList<HttpMessageConverter<?>>();
+        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(Charset.forName("UTF-8"));
+        MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
+        List<HttpMessageConverter<?>> list = new ArrayList<HttpMessageConverter<?>>();
         list.add(stringHttpMessageConverter);
         list.add(mappingJackson2HttpMessageConverter);
         template.setMessageConverters(list);
@@ -87,7 +83,38 @@ public class HttpConnectionUtils {
             //错误返回值处理
 
         }
+        JSONObject body = JSONObject.parseObject(response.getBody());
+        log.info("body:{}", body);
+        return body;
+    }
 
+    /**
+     * @Description post 请求封装
+     * @Author wyue
+     * @Date 2019/7/23 14:33
+     * @Param * @param null
+     * @Return
+     * @Exception
+     */
+    public static JSONObject post(final String url, MultiValueMap<String, String> formParms) {
+
+        if (!StringUtils.isNotBlank(url)) {
+            return null;
+
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formParms, headers);
+        RestTemplate restTemplate = getRestTemplate();
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+        Integer code = response.getStatusCode().value();
+        if (HTTP_CODE_NORMAL != code) {
+
+            //错误返回值处理
+
+        }
         JSONObject body = JSONObject.parseObject(response.getBody());
         log.info("body:{}", body);
         return body;
@@ -98,14 +125,14 @@ public class HttpConnectionUtils {
         return HttpConnectionUtils.get(uriComponents);
     }
 
-        /**
-         * @Description get请求封装
-         * @Author wyue
-         * @Date 2019/7/23 14:34
-         * @Param * @param null
-         * @Return
-         * @Exception
-         */
+    /**
+     * @Description get请求封装
+     * @Author wyue
+     * @Date 2019/7/23 14:34
+     * @Param * @param null
+     * @Return
+     * @Exception
+     */
     public static JSONObject get(final UriComponents uriComponents) {
 
         if (null == uriComponents) {

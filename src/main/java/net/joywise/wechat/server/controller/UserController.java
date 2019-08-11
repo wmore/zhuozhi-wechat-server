@@ -47,7 +47,7 @@ public class UserController {
     @RequestMapping(value = "/{openId}", method = RequestMethod.GET)
     public ServiceResult getUser(@PathParam(value = "openId") String openId) {
         ServiceResult result = new ServiceResult(true);
-        SmartUser userExist = smartUserService.queryByOpenId(openId);
+        SmartUser userExist = smartUserService.getUserInfo(openId);
         if (userExist != null) {
             result.setSuccess(true);
             result.setData(userExist);
@@ -58,9 +58,9 @@ public class UserController {
         return result;
     }
 
-    @ApiOperation("保存智课堂平台的用户信息")
-    @RequestMapping(value = "", method = RequestMethod.POST)
-    public ServiceResult save(@RequestBody SmartUser smartUser) {
+    @ApiOperation("登陆学校智课堂，并绑定微信账号和智课堂平台用户的关系")
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public ServiceResult loginAndBind(@RequestBody SmartUser smartUser) {
         ServiceResult result = new ServiceResult(true);
         SmartUser userExist = smartUserService.queryByOpenId(smartUser.getOpenId());
         if (userExist != null) {

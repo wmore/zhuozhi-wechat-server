@@ -1,9 +1,12 @@
 package net.joywise.wechat.server.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import net.joywise.wechat.server.bean.vo.SchoolVo;
-import net.joywise.wechat.server.dao.SchoolDao;
+import net.joywise.wechat.server.constant.PLATFORM_URL;
 import net.joywise.wechat.server.service.SchoolService;
-import org.springframework.beans.factory.annotation.Autowired;
+import net.joywise.wechat.server.util.HttpConnectionUtils;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -17,18 +20,20 @@ import java.util.List;
  * @company: shopin.net
  * @version: V1.0
  */
+@Service
 public class SchoolServiceImpl implements SchoolService {
-
-    @Autowired
-    private SchoolDao schoolDao;
 
     @Override
     public List<SchoolVo> getSchoolList(boolean isWechatUsed) {
-        return schoolDao.getSchoolList(isWechatUsed ? 1 : 0);
+        return null;
     }
 
     @Override
     public SchoolVo getSchoolById(long schoolId) {
-        return schoolDao.getSchoolById(schoolId);
+        String url = PLATFORM_URL.URL_GET_SCHOOL_INFO.replace("{school_id}", String.valueOf(schoolId));
+        JSONObject resultJson = HttpConnectionUtils.get(PLATFORM_URL.DOMAIN_CLOUD_BASE + url, null);
+        SchoolVo schoolVo = JSON.toJavaObject(resultJson, SchoolVo.class);
+
+        return schoolVo;
     }
 }

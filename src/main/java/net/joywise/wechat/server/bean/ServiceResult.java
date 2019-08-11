@@ -26,7 +26,7 @@ public class ServiceResult<T> implements Serializable{
 	private String message;
 	
 	private Map<String,Object> property;
-	
+
 	private T data;
 	
 	public ServiceResult(){
@@ -46,8 +46,8 @@ public class ServiceResult<T> implements Serializable{
 		this.success = success;
 		this.message = message;
 		this.property = property;
-	} 
-	
+	}
+
 	public boolean isSuccess() {
 		return success;
 	}

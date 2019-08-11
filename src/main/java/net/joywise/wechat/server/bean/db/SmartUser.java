@@ -2,6 +2,7 @@ package net.joywise.wechat.server.bean.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -50,14 +51,26 @@ public class SmartUser {
     @Column(nullable = false)
     private String password;
 
-    // 智管理平台的token
-    @ApiModelProperty(value = "智管理平台的token")
-    private String smartToken;
-
     // 用户类型 0--学生 1--教师 2--平台用户 3--超级管理员
     @ApiModelProperty(value = "用户类型 0--学生 1--教师 2--平台用户 3--超级管理员", required = true)
     @Column(nullable = false)
     private Integer userType;
+
+    @ApiModelProperty(value = "微信的oauth2 的token")
+    @Transient
+    private String wxOauth2Token;
+
+    @ApiModelProperty(value = "学校的智管理平台的token")
+    @Transient
+    private String smartToken;
+
+    @ApiModelProperty(value = "学校的管理平台的url")
+    @Transient
+    private String smartUrl;
+
+    @ApiModelProperty(value = "学校的socketio的url")
+    @Transient
+    private String sockitioUrl;
 
     public SmartUser() {
     }

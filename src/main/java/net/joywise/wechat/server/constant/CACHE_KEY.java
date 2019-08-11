@@ -27,4 +27,9 @@ public class CACHE_KEY {
      */
     public static final String OAUTH2_ACCESS_TOKEN_KEY_PREFIX = "wechat:accessToken:";
 
+    /***
+     * 可以前缀，smart:token:{openid}， 存储账号登陆学校平台的smart token
+     */
+    public static final String USER_SMART_TOKEN_KEY_PREFIX = "smart:token:";
+
 }

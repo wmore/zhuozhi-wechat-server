@@ -7,7 +7,7 @@ CREATE TABLE `t_wechat_user`
     `head_img_url`      varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `language`          varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `nick_name`         varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-    `open_id`           varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `open_id`           varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `province`          varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `qr_scene`          varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `qr_scene_str`      varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE `t_wechat_user`
     `tag_id_list`       tinyblob,
     `un_subscribe_time` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `UKmk5iegpye3vc5ld3b6pyccxgg` (`open_id`)
+    UNIQUE KEY `UK_wechat_user` (`open_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 4
   DEFAULT CHARSET = utf8mb4
@@ -32,7 +32,7 @@ CREATE TABLE `t_smart_user`
     `email`            varchar(50) COLLATE utf8mb4_unicode_ci  DEFAULT NULL,
     `id_number`        varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `name`             varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-    `open_id`          varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `open_id`          varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `school_id`        bigint(20)                              DEFAULT NULL,
     `telephone_number` varchar(11) COLLATE utf8mb4_unicode_ci  DEFAULT NULL,
     `user_id`          bigint(20)                              DEFAULT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE `t_smart_user`
     `smart_token`      varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `user_type`        int(11)    NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `UKmctjgcvrceydkf6wpb8ggrqhg` (`open_id`)
+    UNIQUE KEY `UK_smart_user` (`open_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 4
   DEFAULT CHARSET = utf8mb4
@@ -52,11 +52,11 @@ CREATE TABLE `t_qrcode`
 (
     `id`             bigint(20) NOT NULL AUTO_INCREMENT,
     `expire_seconds` int(11)    NOT NULL,
-    `scene_str`      varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `scene_str`      varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `ticket`         varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `url`            varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     PRIMARY KEY (`id`),
-    KEY `IDXbt4w18iaqpster8ri1ol02gth` (`scene_str`)
+    KEY `IDX_qrcode` (`scene_str`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 24
   DEFAULT CHARSET = utf8mb4
@@ -80,7 +80,7 @@ CREATE TABLE `t_course_teaching`
     `teacher_name`  varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     `teaching_id`   bigint(20)                              NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `UK45qkhs3iclp190ny98utqbim9` (`school_id`, `teaching_id`)
+    UNIQUE KEY `UK_course_teaching` (`school_id`, `teaching_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 27
   DEFAULT CHARSET = utf8mb4

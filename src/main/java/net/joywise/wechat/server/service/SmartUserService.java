@@ -1,7 +1,6 @@
 package net.joywise.wechat.server.service;
 
 import net.joywise.wechat.server.bean.db.SmartUser;
-import net.joywise.wechat.server.bean.vo.SchoolVo;
 
 import java.util.List;
 
@@ -21,6 +20,7 @@ public interface SmartUserService {
 
     void bind(SmartUser smartUser);
 
-    void loginSmartPlatform(SmartUser smartUser);
+    SmartUser loginSmartPlatform(SmartUser smartUser);
 
+    SmartUser getUserInfo(String openId);
 }
