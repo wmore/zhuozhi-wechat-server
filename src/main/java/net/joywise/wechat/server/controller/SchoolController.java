@@ -10,6 +10,7 @@ import net.joywise.wechat.server.service.SmartUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @Title: MsgController
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
  * @company: shopin.net
  * @version: V1.0
  */
-@Api("课程信息的接口")
+@ApiIgnore
 @Controller
 @RequestMapping("/school")
 public class SchoolController {

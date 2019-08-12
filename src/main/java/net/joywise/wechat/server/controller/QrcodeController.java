@@ -1,17 +1,23 @@
 package net.joywise.wechat.server.controller;
 
+import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import net.joywise.wechat.server.bean.ServiceResult;
 import net.joywise.wechat.server.bean.db.QrCode;
+import net.joywise.wechat.server.service.JSAPITicketService;
 import net.joywise.wechat.server.service.QrcodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @Title: QrcodeController
@@ -29,6 +35,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class QrcodeController {
     @Autowired
     private QrcodeService qrcodeService;
+
+    @Autowired
+    private JSAPITicketService jsapiTicketService;
 
     @ApiOperation(value = "创建一个临时二维码")
     @ApiImplicitParams({
@@ -63,5 +72,14 @@ public class QrcodeController {
         serviceResult.setData(qrCode);
         return serviceResult;
     }
+
+    @RequestMapping(value = "/get_sign", method = RequestMethod.GET)
+    public String getSign(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+        String domainUrl = request.getRequestURL().toString();
+        String qrcodeUrl = domainUrl.replace("get_sign", "scan");
+        System.out.println(qrcodeUrl);
+        return JSON.toJSONString(jsapiTicketService.getSign(qrcodeUrl));
+    }
+
 
 }

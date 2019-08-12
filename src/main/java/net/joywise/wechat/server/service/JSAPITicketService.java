@@ -2,6 +2,8 @@ package net.joywise.wechat.server.service;
 
 import net.joywise.wechat.server.enums.TicketType;
 
+import java.util.Map;
+
 /**
  * @Title: JSAPITicketService
  * @Description: TODO(用一句话描述该文件做什么)
@@ -17,5 +19,7 @@ public interface JSAPITicketService {
     void save(String ticket, int expiresIn, TicketType ticketType);
 
     String getTicket(String accessToken, TicketType ticketType);
+
+    Map<String, String> getSign(String url);
 
 }

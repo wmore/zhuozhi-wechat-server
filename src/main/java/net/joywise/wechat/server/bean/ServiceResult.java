@@ -22,7 +22,7 @@ public class ServiceResult<T> implements Serializable{
     
 	@JsonIgnore
 	private Integer statusCode = HttpServletResponse.SC_OK;
-	
+
 	private String message;
 	
 	private Map<String,Object> property;

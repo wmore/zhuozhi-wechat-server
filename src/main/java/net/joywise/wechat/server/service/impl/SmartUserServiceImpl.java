@@ -7,6 +7,7 @@ import net.joywise.wechat.server.bean.vo.SchoolVo;
 import net.joywise.wechat.server.constant.CACHE_KEY;
 import net.joywise.wechat.server.constant.PLATFORM_URL;
 import net.joywise.wechat.server.dao.SmartUserDao;
+import net.joywise.wechat.server.enums.SmartUserErrorEnum;
 import net.joywise.wechat.server.error.CommonException;
 import net.joywise.wechat.server.service.SchoolService;
 import net.joywise.wechat.server.service.SmartUserService;
@@ -53,7 +54,9 @@ public class SmartUserServiceImpl implements SmartUserService {
 
     @Override
     public void saveInDB(SmartUser smartUser) {
-        smartUserDao.save(smartUser);
+        if (isSmartUserExist(smartUser.getOpenId())) {
+            smartUserDao.save(smartUser);
+        }
     }
 
     @Override
@@ -102,34 +105,34 @@ public class SmartUserServiceImpl implements SmartUserService {
     public SmartUser loginSmartPlatform(SmartUser smartUser) {
         long schoolId = smartUser.getSchoolId();
         SchoolVo schoolVo = schoolService.getSchoolById(schoolId);
-        Assert.notNull(schoolVo, "not found the school!");
+        if (schoolVo == null) {
+            throw new CommonException(SmartUserErrorEnum.SCHOOL_INFO_NOT_FOUND);
+        }
         String school_smart_address = schoolVo.getDomainAddressMapper();
         String school_socket_io_address = schoolVo.getSocketIOAddressMapper();
 
-        if (StringUtils.isNotEmpty(school_smart_address) && school_smart_address.endsWith("/")) {
-            school_smart_address = school_smart_address.substring(0, school_smart_address.length() - 1);
-        }
-
-        if (StringUtils.isNotEmpty(school_socket_io_address) && school_socket_io_address.endsWith("/")) {
-            school_socket_io_address = school_socket_io_address.substring(0, school_socket_io_address.length() - 1);
-        }
+        school_smart_address = formatIpAddress(school_smart_address);
+        school_socket_io_address = formatIpAddress(school_socket_io_address);
 
         String smartToken = "";
         boolean smartTokenIsValid = false;
 
         String smartTokenKey = CACHE_KEY.USER_SMART_TOKEN_KEY_PREFIX + smartUser.getOpenId();
-        if (redisUtil.hasKey(smartTokenKey)) {
-            smartToken = (String) redisUtil.get(smartTokenKey);
-            JSONObject resultOfloginByToken = loginSmartPlatformByToken(school_smart_address, smartToken);
 
-            if (resultOfloginByToken != null &&
-                    resultOfloginByToken.getInteger("status") == 1) {
-                smartTokenIsValid = true;
-                smartToken = resultOfloginByToken.getString("token");
+        if (isSmartUserExist(smartUser.getOpenId())) {
+            if (redisUtil.hasKey(smartTokenKey)) {
+                smartToken = (String) redisUtil.get(smartTokenKey);
+                JSONObject resultOfloginByToken = loginSmartPlatformByToken(school_smart_address, smartToken);
+
+                if (resultOfloginByToken != null &&
+                        resultOfloginByToken.getInteger("status") == 1) {
+                    smartTokenIsValid = true;
+                    smartToken = resultOfloginByToken.getString("token");
+                }
             }
         }
 
-        if (smartTokenIsValid == false) {
+        if (!smartTokenIsValid) {
             JSONObject resultOfloginByPwd = loginSmartPlatformByNameAndPwd(school_smart_address, smartUser.getUserName(), smartUser.getPassword());
 
             if (resultOfloginByPwd != null &&
@@ -138,16 +141,31 @@ public class SmartUserServiceImpl implements SmartUserService {
                 //保存token到redis
                 redisUtil.set(smartTokenKey, smartToken, SMART_TOKEN_EXPIRES_IN);
             } else {
-                throw new CommonException("登陆失败！smart平台返回：" + resultOfloginByPwd);
+                log.error("登录失败. logininfo :" + smartUser + "; result is :" + resultOfloginByPwd);
+                throw new CommonException(SmartUserErrorEnum.PASSPORT_LOGIN_FAILED);
             }
         }
 
         smartUser.setSmartToken(smartToken);
         smartUser.setSmartUrl(school_smart_address);
         smartUser.setSockitioUrl(school_socket_io_address);
+
         return smartUser;
     }
 
+    private String formatIpAddress(String ipAddress) {
+        if (StringUtils.isNotEmpty(ipAddress) && ipAddress.endsWith("/")) {
+            ipAddress = ipAddress.substring(0, ipAddress.length() - 1);
+        }
+        return ipAddress;
+    }
+
+    /***
+     * 使用token登陆学校的passport
+     * @param school_smart_address
+     * @param smartToken
+     * @return
+     */
     private JSONObject loginSmartPlatformByToken(String school_smart_address, String smartToken) {
         String loginUrl = PLATFORM_URL.URL_HTTP_PREFIX + school_smart_address + PLATFORM_URL.URL_LOGIN_SCHOOL_PASSPORT_BY_TOKEN;
         HashMap<String, String> loginParms = new HashMap<>();
@@ -178,6 +196,16 @@ public class SmartUserServiceImpl implements SmartUserService {
             e.printStackTrace();
         }
         return null;
+    }
+
+
+    /***
+     * 检查用户是否已经保存过数据库
+     * @param openId
+     * @return
+     */
+    private boolean isSmartUserExist(String openId) {
+        return queryByOpenId(openId) != null;
     }
 
     @Override

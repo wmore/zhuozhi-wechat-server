@@ -30,8 +30,7 @@ public class SmartUser {
     @Column(nullable = false)
     private String openId;
 
-    @ApiModelProperty(value = "用户id", required = true)
-    @NotNull(message = "用户id不能为空")
+    @ApiModelProperty(value = "用户id")
     private Long userId;
 
     //所属学校

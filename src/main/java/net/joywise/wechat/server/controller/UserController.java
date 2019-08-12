@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.joywise.wechat.server.bean.ServiceResult;
 import net.joywise.wechat.server.bean.db.SmartUser;
 import net.joywise.wechat.server.bean.wechat.Oauth2AccessToken;
+import net.joywise.wechat.server.enums.SmartUserErrorEnum;
+import net.joywise.wechat.server.error.CommonException;
 import net.joywise.wechat.server.error.WxErrorException;
 import net.joywise.wechat.server.service.SmartUserService;
 import net.joywise.wechat.server.service.WechatUserService;
@@ -55,31 +57,22 @@ public class UserController {
             result.setSuccess(true);
             result.setData(userExist);
         } else {
-            result.setSuccess(false);
-            result.setMessage("user is not exist, need save!");
+            throw new CommonException(SmartUserErrorEnum.USER_NOT_FOUND);
         }
         return result;
     }
 
-    @ApiOperation("登陆学校智课堂，并绑定微信账号和智课堂平台用户的关系")
+    @ApiOperation(value = "登陆学校智课堂，并绑定微信账号和智课堂平台用户的关系", notes = "密码不需urlencode")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ServiceResult loginAndBind(@RequestBody SmartUser smartUser) {
         ServiceResult result = new ServiceResult(true);
-        SmartUser userExist = smartUserService.queryByOpenId(smartUser.getOpenId());
-        if (userExist != null) {
-            result.setSuccess(false);
-            result.setMessage("该用户已经存在，无需再次绑定！");
-        } else {
-            try {
-                smartUser.setPassword(URLDecoder.decode(smartUser.getPassword(), "utf-8"));
-                SmartUser user = smartUserService.bind(smartUser);
-                result.setMessage("绑定成功！");
-                result.setData(user);
-            } catch (Exception e) {
-                result.setSuccess(false);
-                result.setMessage("绑定失败！");
-                e.printStackTrace();
-            }
+        try {
+//                smartUser.setPassword(URLDecoder.decode(smartUser.getPassword(), "utf-8"));
+            SmartUser user = smartUserService.bind(smartUser);
+            result.setMessage("绑定成功！");
+            result.setData(user);
+        } catch (Exception e) {
+            throw e;
         }
         return result;
     }
