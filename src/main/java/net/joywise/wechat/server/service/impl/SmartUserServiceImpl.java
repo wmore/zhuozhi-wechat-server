@@ -1,5 +1,6 @@
 package net.joywise.wechat.server.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import net.joywise.wechat.server.bean.db.SmartUser;
@@ -8,6 +9,7 @@ import net.joywise.wechat.server.constant.CACHE_KEY;
 import net.joywise.wechat.server.constant.PLATFORM_URL;
 import net.joywise.wechat.server.dao.SmartUserDao;
 import net.joywise.wechat.server.enums.SmartUserErrorEnum;
+import net.joywise.wechat.server.enums.UserType;
 import net.joywise.wechat.server.error.CommonException;
 import net.joywise.wechat.server.service.SchoolService;
 import net.joywise.wechat.server.service.SmartUserService;
@@ -16,16 +18,11 @@ import net.joywise.wechat.server.util.RedisUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Title: SmartUserServiceImpl
@@ -50,11 +47,11 @@ public class SmartUserServiceImpl implements SmartUserService {
     @Autowired
     private RedisUtil redisUtil;
 
-    private static final long SMART_TOKEN_EXPIRES_IN = 24 * 60 * 30;
+    private static final long USER_INFO_EXPIRES_IN = 24 * 60 * 30 - 60;
 
     @Override
     public void saveInDB(SmartUser smartUser) {
-        if (isSmartUserExist(smartUser.getOpenId())) {
+        if (!isSmartUserExist(smartUser.getOpenId())) {
             smartUserDao.save(smartUser);
         }
     }
@@ -114,44 +111,49 @@ public class SmartUserServiceImpl implements SmartUserService {
         school_smart_address = formatIpAddress(school_smart_address);
         school_socket_io_address = formatIpAddress(school_socket_io_address);
 
-        String smartToken = "";
-        boolean smartTokenIsValid = false;
-
-        String smartTokenKey = CACHE_KEY.USER_SMART_TOKEN_KEY_PREFIX + smartUser.getOpenId();
 
         if (isSmartUserExist(smartUser.getOpenId())) {
-            if (redisUtil.hasKey(smartTokenKey)) {
-                smartToken = (String) redisUtil.get(smartTokenKey);
-                JSONObject resultOfloginByToken = loginSmartPlatformByToken(school_smart_address, smartToken);
 
+            SmartUser userInCache = getUserInfoFromCache(smartUser.getOpenId());
+            if (userInCache != null) {
+                JSONObject resultOfloginByToken = loginPassportByToken(school_smart_address, userInCache.getSmartToken());
                 if (resultOfloginByToken != null &&
                         resultOfloginByToken.getInteger("status") == 1) {
-                    smartTokenIsValid = true;
-                    smartToken = resultOfloginByToken.getString("token");
+                    return userInCache;
                 }
             }
         }
 
-        if (!smartTokenIsValid) {
-            JSONObject resultOfloginByPwd = loginSmartPlatformByNameAndPwd(school_smart_address, smartUser.getUserName(), smartUser.getPassword());
+        JSONObject resultOfloginByPwd = loginSmartClassApiByNameAndPwd(school_smart_address, smartUser.getUserName(), smartUser.getPassword());
 
-            if (resultOfloginByPwd != null &&
-                    resultOfloginByPwd.getInteger("status") == 1) {
-                smartToken = resultOfloginByPwd.getString("token");
-                //保存token到redis
-                redisUtil.set(smartTokenKey, smartToken, SMART_TOKEN_EXPIRES_IN);
-            } else {
-                log.error("登录失败. logininfo :" + smartUser + "; result is :" + resultOfloginByPwd);
-                throw new CommonException(SmartUserErrorEnum.PASSPORT_LOGIN_FAILED);
+        if (resultOfloginByPwd != null &&
+                resultOfloginByPwd.getBoolean("success") == true) {
+            JSONObject resultJson = resultOfloginByPwd.getJSONObject("result");
+
+            smartUser.setSmartToken(resultJson.getString("token"));
+            int userType = resultJson.getInteger("userType");
+
+            if (userType == UserType.STUDENT.getType()) {
+                smartUser.setHeadImageUrl(formatSmartResourceUrl(resultJson.getString("headImageUrl"), school_smart_address));
+                smartUser.setClassName(resultJson.getString("className"));
+                smartUser.setGrade(resultJson.getString("grade"));
+                smartUser.setSpecialtyName(resultJson.getString("specialtyName"));
+                smartUser.setSchoolName(resultJson.getString("schoolName"));
+                smartUser.setUserId(resultJson.getLong("userId"));
             }
+
+        } else {
+            log.error("登录失败. logininfo :" + smartUser + "; result is :" + resultOfloginByPwd);
+            throw new CommonException(SmartUserErrorEnum.PASSPORT_LOGIN_FAILED);
         }
 
-        smartUser.setSmartToken(smartToken);
         smartUser.setSmartUrl(school_smart_address);
         smartUser.setSockitioUrl(school_socket_io_address);
+        saveUserInfoInCache(smartUser, USER_INFO_EXPIRES_IN);
 
         return smartUser;
     }
+
 
     private String formatIpAddress(String ipAddress) {
         if (StringUtils.isNotEmpty(ipAddress) && ipAddress.endsWith("/")) {
@@ -160,19 +162,52 @@ public class SmartUserServiceImpl implements SmartUserService {
         return ipAddress;
     }
 
+    public String formatSmartResourceUrl(String resourceUrl, String ipAddress) {
+        if (StringUtils.isNotEmpty(resourceUrl)) {
+            return "";
+        }
+        String reg = "((2[0-4]\\d|25[0-5]|[01]?\\d\\d?)\\.){3}(2[0-4]\\d|25[0-5]|[01]?\\d\\d?)"; //匹配ip的正则
+        String url = resourceUrl.replaceFirst(reg, ipAddress);
+        return url;
+    }
+
     /***
      * 使用token登陆学校的passport
      * @param school_smart_address
      * @param smartToken
      * @return
      */
-    private JSONObject loginSmartPlatformByToken(String school_smart_address, String smartToken) {
+    private JSONObject loginPassportByToken(String school_smart_address, String smartToken) {
         String loginUrl = PLATFORM_URL.URL_HTTP_PREFIX + school_smart_address + PLATFORM_URL.URL_LOGIN_SCHOOL_PASSPORT_BY_TOKEN;
         HashMap<String, String> loginParms = new HashMap<>();
         loginParms.put("token", smartToken);
 
         JSONObject resultJson = HttpConnectionUtils.post(loginUrl, loginParms);
         return resultJson;
+    }
+
+
+    /***
+     * 使用用户名、密码登陆学校的smartclassapi
+     * @param school_smart_address
+     * @param userName
+     * @param password
+     * @return
+     */
+    private JSONObject loginSmartClassApiByNameAndPwd(String school_smart_address, String userName, String password) {
+
+        try {
+            String loginUrl = PLATFORM_URL.URL_HTTP_PREFIX + school_smart_address + PLATFORM_URL.URL_LOGIN_SCHOOL_SMART_CLASS_API;
+            HashMap<String, String> loginParms = new HashMap<>();
+            loginParms.put("username", userName);
+            loginParms.put("password", URLEncoder.encode(password, "utf-8"));
+            JSONObject resultJson = HttpConnectionUtils.post(loginUrl, loginParms);
+            return resultJson;
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /***
@@ -182,7 +217,7 @@ public class SmartUserServiceImpl implements SmartUserService {
      * @param password
      * @return
      */
-    private JSONObject loginSmartPlatformByNameAndPwd(String school_smart_address, String userName, String password) {
+    private JSONObject loginPassportByNameAndPwd(String school_smart_address, String userName, String password) {
 
         try {
             String loginUrl = PLATFORM_URL.URL_HTTP_PREFIX + school_smart_address + PLATFORM_URL.URL_LOGIN_SCHOOL_PASSPORT;
@@ -216,4 +251,32 @@ public class SmartUserServiceImpl implements SmartUserService {
         }
         return null;
     }
+
+    /***
+     * 从缓存里获取用户信息
+     * @param openId
+     * @return
+     */
+    private SmartUser getUserInfoFromCache(String openId) {
+        String key = CACHE_KEY.SMART_USER_INFO_KEY_PREFIX + openId;
+        if (redisUtil.hasKey(key)) {
+            JSONObject info = JSONObject.parseObject((String) redisUtil.get(key));
+            SmartUser user = JSONObject.toJavaObject(info, SmartUser.class);
+            return user;
+        }
+
+        return null;
+    }
+
+    /***
+     * 保存用户信息在缓存
+     * @param user
+     * @return
+     */
+    private void saveUserInfoInCache(SmartUser user, long expireIn) {
+        String key = CACHE_KEY.SMART_USER_INFO_KEY_PREFIX + user.getOpenId();
+        JSONObject jsonObj = (JSONObject) JSON.toJSON(user);
+        redisUtil.set(key, jsonObj.toJSONString(), expireIn);
+    }
+
 }

@@ -76,11 +76,9 @@ public class QrServiceImpl implements QrcodeService {
 
             return QrCode.fromJson(resultJson.toString());
         } catch (WxErrorException e) {
-            e.printStackTrace();
-            log.error("Try get token has error!", e);
+            throw e;
         }
 
-        return null;
     }
 
     @Override
@@ -108,11 +106,9 @@ public class QrServiceImpl implements QrcodeService {
             return qrcodeDao.save(qrCode);
 
         } catch (WxErrorException e) {
-            e.printStackTrace();
-            log.error("Try get token has error!", e);
+            throw e;
         }
 
-        return null;
     }
 
     @Override

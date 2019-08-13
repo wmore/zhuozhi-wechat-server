@@ -24,7 +24,8 @@ public class ServiceResult<T> implements Serializable{
 	private Integer statusCode = HttpServletResponse.SC_OK;
 
 	private String message;
-	
+
+	@JsonIgnore
 	private Map<String,Object> property;
 
 	private T data;

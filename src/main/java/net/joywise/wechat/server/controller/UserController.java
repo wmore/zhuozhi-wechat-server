@@ -1,9 +1,6 @@
 package net.joywise.wechat.server.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import net.joywise.wechat.server.bean.ServiceResult;
@@ -18,13 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.websocket.server.PathParam;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @Title: UserController
@@ -107,12 +97,8 @@ public class UserController {
             result.setData(token);
             return result;
         } catch (WxErrorException e) {
-            e.printStackTrace();
-            log.error("doOauth2", e);
-            result.setProperty(e.getError().toMap());
+            throw e;
         }
-
-        return result;
     }
 
 }

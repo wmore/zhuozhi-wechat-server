@@ -51,7 +51,7 @@ public class JSAPITicketServiceImpl implements JSAPITicketService {
     private static final int TIME_DIFFERENCE_LOSE = 60; //秒
 
     @Override
-    public void save(String ticket, int expiresIn, TicketType ticketType) {
+    public void saveTicket(String ticket, int expiresIn, TicketType ticketType) {
         String ticketKey = CACHE_KEY.TICKET_KEY_PREFIX + ticketType.getCode();
         boolean hasKey = redisUtil.hasKey(ticketKey);
         if (hasKey) {
@@ -76,15 +76,15 @@ public class JSAPITicketServiceImpl implements JSAPITicketService {
         JSONObject response = HttpConnectionUtils.get(WX_URL.URL_GET_JSAPI_TICKET, data);
         log.debug("url:" + WX_URL.URL_GET_JSAPI_TICKET + "; params : " + data + " ;response: " + response);
 
-        int errcode = response.getInteger("access_token");
+        int errcode = response.getInteger("errcode");
         String errmsg = response.getString("errmsg");
         String ticket = response.getString("ticket");
         int expiresIn = response.getInteger("expires_in");
 
         //请求成功
         if (errcode == 0) {
-            save(accessToken, expiresIn, ticketType);
-            return accessToken;
+            saveTicket(ticket, expiresIn, ticketType);
+            return ticket;
         }
         log.error("get jsapiticket for accessToken" + accessToken + " failed. result is :" + response);
 
@@ -139,12 +139,9 @@ public class JSAPITicketServiceImpl implements JSAPITicketService {
             log.info("6.timestamp=" + ret.get("timestamp"));
 
             return ret;
-        } catch (
-                WxErrorException e) {
-            e.printStackTrace();
-            log.error("Try get token has error!", e);
+        } catch (WxErrorException e) {
+            throw e;
         }
-        return null;
     }
 
 

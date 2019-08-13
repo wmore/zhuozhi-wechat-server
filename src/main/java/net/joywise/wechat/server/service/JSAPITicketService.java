@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public interface JSAPITicketService {
 
-    void save(String ticket, int expiresIn, TicketType ticketType);
+    void saveTicket(String ticket, int expiresIn, TicketType ticketType);
 
     String getTicket(String accessToken, TicketType ticketType);
 

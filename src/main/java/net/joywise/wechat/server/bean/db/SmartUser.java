@@ -39,6 +39,7 @@ public class SmartUser {
     private Long schoolId;
 
     // 手机号
+    @JsonIgnore
     @Column(length = 11)
     private String telephoneNumber;
 
@@ -56,6 +57,7 @@ public class SmartUser {
     @Column(nullable = false)
     private Integer userType;
 
+    @JsonIgnore
     @ApiModelProperty(value = "微信的oauth2 的token")
     @Transient
     private String wxOauth2Token;
@@ -72,6 +74,27 @@ public class SmartUser {
     @Transient
     private String sockitioUrl;
 
+    @ApiModelProperty(value = "头像")
+    @Transient
+    private String headImageUrl;
+
+    @ApiModelProperty(value = "班级")
+    @Transient
+    private String className;
+
+    @ApiModelProperty(value = "年级")
+    @Transient
+    private String grade;
+
+    @ApiModelProperty(value = "专业")
+    @Transient
+    private String specialtyName;
+
+    @ApiModelProperty(value = "学校")
+    @Transient
+    private String schoolName;
+
+
     public SmartUser() {
     }
 
@@ -83,5 +106,10 @@ public class SmartUser {
     @JsonProperty
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @JsonIgnore
+    public Long getId() {
+        return id;
     }
 }

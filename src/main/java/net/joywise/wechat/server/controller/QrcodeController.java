@@ -11,9 +11,11 @@ import net.joywise.wechat.server.service.JSAPITicketService;
 import net.joywise.wechat.server.service.QrcodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -73,7 +75,9 @@ public class QrcodeController {
         return serviceResult;
     }
 
+    @ApiOperation(value = "获取签名，用于前端页面调用微信jsapi")
     @RequestMapping(value = "/get_sign", method = RequestMethod.GET)
+    @ResponseBody
     public String getSign(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
         String domainUrl = request.getRequestURL().toString();
         String qrcodeUrl = domainUrl.replace("get_sign", "scan");
@@ -81,5 +85,9 @@ public class QrcodeController {
         return JSON.toJSONString(jsapiTicketService.getSign(qrcodeUrl));
     }
 
+    @RequestMapping("/scan")
+    public String doScan(Model model) {
+        return "scan_qrcode";
+    }
 
 }

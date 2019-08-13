@@ -271,8 +271,7 @@ public class MsgServiceImpl implements MsgService {
                 return true;
             }
         } catch (WxErrorException e) {
-            e.printStackTrace();
-            log.error("Try get token has error!", e);
+            throw e;
         }
         return false;
     }

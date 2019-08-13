@@ -25,7 +25,9 @@ public class PLATFORM_URL {
      */
     public static final String URL_GET_SCHOOL_INFO = "/school/config_wechat/{school_id}";
 
-    public static final String URL_LOGIN_SCHOOL_PASSPORT = "/passport/login?username={username}&password={password}";
+    public static final String URL_LOGIN_SCHOOL_SMART_CLASS_API = "/smartclassapi/login?username={username}&password={password}";
+
+    public static final String URL_LOGIN_SCHOOL_PASSPORT = "/smartclassapi/login?username={username}&password={password}";
 
     public static final String URL_LOGIN_SCHOOL_PASSPORT_BY_TOKEN = "/passport/loginByToken?token={token}";
 

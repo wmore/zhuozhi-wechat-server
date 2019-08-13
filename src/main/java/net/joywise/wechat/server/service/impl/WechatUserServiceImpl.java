@@ -110,12 +110,10 @@ public class WechatUserServiceImpl implements WechatUserService {
             JSONObject resJson = HttpConnectionUtils.get(WX_URL.URL_GET_USER_INFO, data);
 
             wechatUser = WechatUser.fromJson(resJson.toString());
+            return wechatUser;
         } catch (WxErrorException e) {
-            e.printStackTrace();
-            log.error("Try get token has error!", e);
+            throw e;
         }
-
-        return wechatUser;
 
     }
 
@@ -198,12 +196,12 @@ public class WechatUserServiceImpl implements WechatUserService {
                     wechatUserList.add(user);
                 }
             }
+            return wechatUserList;
+
         } catch (WxErrorException e) {
-            e.printStackTrace();
-            log.error("Try get token has error!", e);
+            throw e;
         }
 
-        return wechatUserList;
     }
 
     @Override
