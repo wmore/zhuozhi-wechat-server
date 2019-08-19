@@ -11,7 +11,7 @@ import lombok.Getter;
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
 @Getter
-public enum TicketType {
+public enum TicketTypeEnum {
   /**
    * jsapi
    */
@@ -29,7 +29,7 @@ public enum TicketType {
    */
   private String code;
 
-  TicketType(String code) {
+  TicketTypeEnum(String code) {
     this.code = code;
   }
 }

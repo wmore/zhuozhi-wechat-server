@@ -6,9 +6,12 @@ import net.joywise.wechat.server.bean.vo.SchoolVo;
 import net.joywise.wechat.server.constant.PLATFORM_URL;
 import net.joywise.wechat.server.service.SchoolService;
 import net.joywise.wechat.server.util.HttpConnectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Title: SchoolServiceImpl
@@ -23,6 +26,10 @@ import java.util.List;
 @Service
 public class SchoolServiceImpl implements SchoolService {
 
+    @Value("${com.constant.domain.cloud-base}")
+    public String DOMAIN_CLOUD_BASE;
+
+
     @Override
     public List<SchoolVo> getSchoolList(boolean isWechatUsed) {
         return null;
@@ -30,18 +37,11 @@ public class SchoolServiceImpl implements SchoolService {
 
     @Override
     public SchoolVo getSchoolById(long schoolId) {
-//        String url = PLATFORM_URL.URL_GET_SCHOOL_INFO.replace("{school_id}", String.valueOf(schoolId));
-//        JSONObject resultJson = HttpConnectionUtils.get(PLATFORM_URL.DOMAIN_CLOUD_BASE + url, null);
-
-        JSONObject resultJson = new JSONObject();
-        resultJson.put("schoolId", 93);
-        resultJson.put("schoolName", "福建师范大学");
-        resultJson.put("schoolType", 1);
-        resultJson.put("isWechatUsed", true);
-        resultJson.put("domainAddressMapper", "10.10.23.31");
-        resultJson.put("socketIOAddressMapper", "10.10.23.31");
-
-        SchoolVo schoolVo = JSON.toJavaObject(resultJson, SchoolVo.class);
+        String url = DOMAIN_CLOUD_BASE + PLATFORM_URL.URL_GET_SCHOOL_INFO;
+        Map<String, Object> data = new HashMap<>();
+        data.put("school_id", schoolId);
+        JSONObject resultJson = HttpConnectionUtils.get(url, data).getJSONObject("data");
+        SchoolVo schoolVo = JSONObject.toJavaObject(resultJson, SchoolVo.class);
 
         return schoolVo;
     }

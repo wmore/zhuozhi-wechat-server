@@ -11,7 +11,7 @@ import lombok.Getter;
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
 @Getter
-public enum AiLangType {
+public enum AiLangTypeEnum {
   /**
    * 中文 汉语.
    */
@@ -23,7 +23,7 @@ public enum AiLangType {
 
   private String code;
 
-  AiLangType(String code) {
+  AiLangTypeEnum(String code) {
     this.code = code;
   }
 }

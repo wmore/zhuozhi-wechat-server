@@ -1,16 +1,13 @@
 package net.joywise.wechat.server.service.impl;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import net.joywise.wechat.server.bean.db.CourseTeaching;
-import net.joywise.wechat.server.bean.db.WechatUser;
 import net.joywise.wechat.server.bean.wechat.message.News;
 import net.joywise.wechat.server.bean.wechat.message.NewsMessage;
 import net.joywise.wechat.server.bean.wechat.message.TextMessage;
 import net.joywise.wechat.server.bean.wechat.WeixinMessageInfo;
 import net.joywise.wechat.server.constant.WX_URL;
-import net.joywise.wechat.server.enums.AiLangType;
 import net.joywise.wechat.server.error.WxErrorException;
 import net.joywise.wechat.server.service.BaseAccessTokenService;
 import net.joywise.wechat.server.service.MsgService;

@@ -63,7 +63,6 @@ public class SmartUser {
     private String wxOauth2Token;
 
     @ApiModelProperty(value = "学校的智管理平台的token")
-    @Transient
     private String smartToken;
 
     @ApiModelProperty(value = "学校的管理平台的url")
@@ -75,23 +74,18 @@ public class SmartUser {
     private String sockitioUrl;
 
     @ApiModelProperty(value = "头像")
-    @Transient
     private String headImageUrl;
 
     @ApiModelProperty(value = "班级")
-    @Transient
     private String className;
 
     @ApiModelProperty(value = "年级")
-    @Transient
     private String grade;
 
     @ApiModelProperty(value = "专业")
-    @Transient
     private String specialtyName;
 
     @ApiModelProperty(value = "学校")
-    @Transient
     private String schoolName;
 
 

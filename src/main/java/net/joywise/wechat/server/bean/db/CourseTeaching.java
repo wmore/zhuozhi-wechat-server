@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 @Entity
-@Table(name = "t_course_teaching", uniqueConstraints = {@UniqueConstraint(columnNames = {"schoolId", "teachingId"})})
+@Table(name = "t_course_teaching", uniqueConstraints = {@UniqueConstraint(columnNames = {"schoolId", "snapshotId"})})
 public class CourseTeaching {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)

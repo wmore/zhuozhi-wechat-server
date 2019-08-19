@@ -40,6 +40,11 @@ CREATE TABLE `t_smart_user`
     `password`         varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `smart_token`      varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `user_type`        int(11)    NOT NULL,
+    `head_image_url`      varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `school_name`      varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `class_name`      varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `grade`      varchar(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `specialty_name`      varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `UK_smart_user` (`open_id`)
 ) ENGINE = InnoDB
@@ -80,7 +85,7 @@ CREATE TABLE `t_course_teaching`
     `teacher_name`  varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     `teaching_id`   bigint(20)                              NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `UK_course_teaching` (`school_id`, `teaching_id`)
+    UNIQUE KEY `UK_course_teaching` (`school_id`, `snapshot_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 27
   DEFAULT CHARSET = utf8mb4

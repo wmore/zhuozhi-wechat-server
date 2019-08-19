@@ -96,11 +96,8 @@ public class QrServiceImpl implements QrcodeService {
             String reqStr = QRCODE_PARAMS_LIMIT_WITH_SCENE_STR.replace("SCENESTR", scene);
 
             JSONObject postJson = JSON.parseObject(reqStr);
-
             JSONObject resultJson = HttpConnectionUtils.post(url, postJson);
-
-            qrCode = JSON.parseObject(resultJson.toString(), new TypeReference<QrCode>() {
-            });
+            qrCode = JSONObject.toJavaObject(resultJson, QrCode.class);
 
             qrCode.setSceneStr(scene);
             return qrcodeDao.save(qrCode);

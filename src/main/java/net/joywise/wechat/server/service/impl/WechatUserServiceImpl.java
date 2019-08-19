@@ -9,7 +9,7 @@ import net.joywise.wechat.server.bean.wechat.Oauth2AccessToken;
 import net.joywise.wechat.server.constant.CACHE_KEY;
 import net.joywise.wechat.server.constant.WX_URL;
 import net.joywise.wechat.server.dao.WechatUserDao;
-import net.joywise.wechat.server.enums.AiLangType;
+import net.joywise.wechat.server.enums.AiLangTypeEnum;
 import net.joywise.wechat.server.error.WxError;
 import net.joywise.wechat.server.error.WxErrorException;
 import net.joywise.wechat.server.service.BaseAccessTokenService;
@@ -105,7 +105,7 @@ public class WechatUserServiceImpl implements WechatUserService {
             Map<String, Object> data = new HashMap<>();
             data.put("access_token", accessToken);
             data.put("openid", openId);
-            data.put("lang", AiLangType.zh_CN.getCode());
+            data.put("lang", AiLangTypeEnum.zh_CN.getCode());
 
             JSONObject resJson = HttpConnectionUtils.get(WX_URL.URL_GET_USER_INFO, data);
 
@@ -179,7 +179,7 @@ public class WechatUserServiceImpl implements WechatUserService {
             for (String openId : openIdList) {
                 JSONObject json = new JSONObject();
                 json.put("openid", openId);
-                json.put("lang", AiLangType.zh_CN.getCode());
+                json.put("lang", AiLangTypeEnum.zh_CN.getCode());
 
                 userJsonArray.add(json);
             }
@@ -242,16 +242,20 @@ public class WechatUserServiceImpl implements WechatUserService {
                 sceneStr = eventKey.replace("qrscene_", "");
             }
 
-            if (!StringUtils.isEmpty(sceneStr) && sceneStr.split("_").length > 1) {
-                long schoolId = Long.parseLong(sceneStr.split("_")[0]);
-                long snapshotId = Long.parseLong(sceneStr.split("_")[1]);
+            if (StringUtils.isEmpty(sceneStr)) {
+                return msgService.initTextMessage(toOpenId, fromOpenId, "感谢关注卓智智课堂公众号");
+            }
+
+            // qescene 的内容是schoolId_snapshotId
+            String[] sceneStrSplit = sceneStr.split("_");
+            if (sceneStrSplit.length > 1) {
+                long schoolId = Long.parseLong(sceneStrSplit[0]);
+                long snapshotId = Long.parseLong(sceneStrSplit[1]);
                 CourseTeaching courseTeaching = courseTeachingService.queryBySnapshotId(snapshotId, schoolId);
                 return msgService.initNewsMessage(toOpenId, fromOpenId, courseTeaching);
             }
         }
-
         return msgService.initTextMessage(toOpenId, fromOpenId, "感谢关注卓智智课堂公众号");
-
     }
 
     @Override
@@ -268,9 +272,15 @@ public class WechatUserServiceImpl implements WechatUserService {
                 sceneStr = eventKey.replace("qrscene_", "");
             }
 
-            if (!StringUtils.isEmpty(sceneStr) && sceneStr.split("_").length > 1) {
-                long schoolId = Long.parseLong(sceneStr.split("_")[0]);
-                long snapshotId = Long.parseLong(sceneStr.split("_")[1]);
+            if (StringUtils.isEmpty(sceneStr)) {
+                return;
+            }
+
+            // qescene 的内容是schoolId_snapshotId
+            String[] sceneStrSplit = sceneStr.split("_");
+            if (sceneStrSplit.length > 1) {
+                long schoolId = Long.parseLong(sceneStrSplit[0]);
+                long snapshotId = Long.parseLong(sceneStrSplit[1]);
                 CourseTeaching courseTeaching = courseTeachingService.queryBySnapshotId(snapshotId, schoolId);
                 msgService.sendTemplateMessage(fromOpenId, courseTeaching);
             }
@@ -298,8 +308,7 @@ public class WechatUserServiceImpl implements WechatUserService {
     public Oauth2AccessToken getOauth2AccessTokenByCode(String code) throws WxErrorException {
         String key = CACHE_KEY.OAUTH2_ACCESS_TOKEN_KEY_PREFIX + code;
 
-        boolean hasKey = redisUtil.hasKey(key);
-        if (hasKey) {
+        if (redisUtil.hasKey(key)) {
             return Oauth2AccessToken.fromJson((String) redisUtil.get(key));
         }
 

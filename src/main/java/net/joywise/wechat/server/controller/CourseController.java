@@ -11,10 +11,7 @@ import net.joywise.wechat.server.service.MsgService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,6 +42,17 @@ public class CourseController {
         ServiceResult result = new ServiceResult(true);
 
         result.setData(courseTeachingService.createNewCourse(courseTeaching));
+
+        return result;
+    }
+
+    @ApiOperation(value="查询课程信息")
+    @RequestMapping(value = "", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResult<CourseTeaching> get(@RequestParam Long snapshotId, @RequestParam Long schoolId) {
+        ServiceResult result = new ServiceResult(true);
+
+        result.setData(courseTeachingService.queryBySnapshotId(snapshotId,schoolId));
 
         return result;
     }

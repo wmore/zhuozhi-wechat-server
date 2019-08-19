@@ -15,9 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 public class PLATFORM_URL {
 
 
-    @Value("${com.constant.domain.cloud-base}")
-    public static String DOMAIN_CLOUD_BASE;
-
     public static final String URL_HTTP_PREFIX = "http://";
 
     /***
@@ -31,5 +28,6 @@ public class PLATFORM_URL {
 
     public static final String URL_LOGIN_SCHOOL_PASSPORT_BY_TOKEN = "/passport/loginByToken?token={token}";
 
+    public static final String URL_LOGOUT_SCHOOL_PASSPORT_BY_TOKEN = "/passport/idsLogout?token={token}";
 
 }

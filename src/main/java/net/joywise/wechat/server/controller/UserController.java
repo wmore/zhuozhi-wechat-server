@@ -56,16 +56,33 @@ public class UserController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ServiceResult loginAndBind(@RequestBody SmartUser smartUser) {
         ServiceResult result = new ServiceResult(true);
-        try {
 //                smartUser.setPassword(URLDecoder.decode(smartUser.getPassword(), "utf-8"));
-            SmartUser user = smartUserService.bind(smartUser);
-            result.setMessage("绑定成功！");
-            result.setData(user);
-        } catch (Exception e) {
-            throw e;
+        SmartUser userExist = smartUserService.getUserInfo(smartUser.getOpenId());
+        if (userExist != null) {
+            result.setData(userExist);
+            result.setMessage("此用户已经存在，若要修改信息，请解绑定后重新绑定登录！");
+            return result;
         }
+
+        SmartUser userExistName = smartUserService.queryByUserNameAndSchoolId(smartUser.getUserName(), smartUser.getSchoolId());
+        if (userExistName != null) {
+            throw new CommonException("此用户已经绑定其它微信账号，请重新输入用户名、密码后再次登录！");
+        }
+
+        SmartUser user = smartUserService.bind(smartUser);
+        result.setMessage("绑定成功！");
+        result.setData(user);
         return result;
     }
+
+    @ApiOperation(value = "退出登录学校智课堂，并解除绑定微信账号和智课堂平台用户的关系")
+    @RequestMapping(value = "/logout/{openId}", method = RequestMethod.POST)
+    public ServiceResult logoutAndUnbind(@PathVariable String openId) {
+        smartUserService.unBind(openId);
+        ServiceResult result = new ServiceResult(true);
+        return result;
+    }
+
 
     /***
      * 返回

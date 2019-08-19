@@ -3,7 +3,7 @@ package net.joywise.wechat.server.enums;
 import lombok.Getter;
 
 @Getter
-public enum UserType {
+public enum UserTypeEnum {
     /***
      * 学生
      */
@@ -26,7 +26,7 @@ public enum UserType {
      */
     private int type;
 
-    UserType(int type) {
+    UserTypeEnum(int type) {
         this.type = type;
     }
 }

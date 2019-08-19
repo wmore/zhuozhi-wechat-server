@@ -1,6 +1,6 @@
 package net.joywise.wechat.server.service;
 
-import net.joywise.wechat.server.enums.TicketType;
+import net.joywise.wechat.server.enums.TicketTypeEnum;
 
 import java.util.Map;
 
@@ -16,9 +16,9 @@ import java.util.Map;
  */
 public interface JSAPITicketService {
 
-    void saveTicket(String ticket, int expiresIn, TicketType ticketType);
+    void saveTicket(String ticket, int expiresIn, TicketTypeEnum ticketTypeEnum);
 
-    String getTicket(String accessToken, TicketType ticketType);
+    String getTicket(String accessToken, TicketTypeEnum ticketTypeEnum);
 
     Map<String, String> getSign(String url);
 

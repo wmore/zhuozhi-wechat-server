@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -71,6 +72,17 @@ public class QrcodeController {
     public ServiceResult<QrCode> getQrCodeWithScene(String scene_str) {
         ServiceResult serviceResult = new ServiceResult(true);
         QrCode qrCode = qrcodeService.getQrTicketWithScene(scene_str);
+        serviceResult.setData(qrCode);
+        return serviceResult;
+    }
+
+    @ApiOperation(value = "获取二维码")
+    @RequestMapping(value = "", method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResult<QrCode> getQrCodeWithScene(@RequestParam Long schoolId, @RequestParam Long snapshotId) {
+        ServiceResult serviceResult = new ServiceResult(true);
+        String sceneStr = schoolId + "_" + snapshotId;
+        QrCode qrCode = qrcodeService.getQrTicketWithScene(sceneStr);
         serviceResult.setData(qrCode);
         return serviceResult;
     }

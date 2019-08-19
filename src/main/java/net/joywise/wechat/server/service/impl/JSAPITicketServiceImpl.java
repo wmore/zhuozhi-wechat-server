@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import net.joywise.wechat.server.constant.CACHE_KEY;
 import net.joywise.wechat.server.constant.WX_URL;
-import net.joywise.wechat.server.enums.TicketType;
+import net.joywise.wechat.server.enums.TicketTypeEnum;
 import net.joywise.wechat.server.error.WxErrorException;
 import net.joywise.wechat.server.service.BaseAccessTokenService;
 import net.joywise.wechat.server.service.JSAPITicketService;
@@ -51,8 +51,8 @@ public class JSAPITicketServiceImpl implements JSAPITicketService {
     private static final int TIME_DIFFERENCE_LOSE = 60; //秒
 
     @Override
-    public void saveTicket(String ticket, int expiresIn, TicketType ticketType) {
-        String ticketKey = CACHE_KEY.TICKET_KEY_PREFIX + ticketType.getCode();
+    public void saveTicket(String ticket, int expiresIn, TicketTypeEnum ticketTypeEnum) {
+        String ticketKey = CACHE_KEY.TICKET_KEY_PREFIX + ticketTypeEnum.getCode();
         boolean hasKey = redisUtil.hasKey(ticketKey);
         if (hasKey) {
             log.warn("the key " + ticketKey + " already exists, overwrite it .");
@@ -61,8 +61,8 @@ public class JSAPITicketServiceImpl implements JSAPITicketService {
     }
 
     @Override
-    public String getTicket(String accessToken, TicketType ticketType) {
-        String ticketKey = CACHE_KEY.TICKET_KEY_PREFIX + ticketType.getCode();
+    public String getTicket(String accessToken, TicketTypeEnum ticketTypeEnum) {
+        String ticketKey = CACHE_KEY.TICKET_KEY_PREFIX + ticketTypeEnum.getCode();
 
         boolean hasKey = redisUtil.hasKey(ticketKey);
         if (hasKey) {
@@ -71,7 +71,7 @@ public class JSAPITicketServiceImpl implements JSAPITicketService {
 
         Map<String, Object> data = new HashMap<>();
         data.put("access_token", accessToken);
-        data.put("type", ticketType.getCode());
+        data.put("type", ticketTypeEnum.getCode());
 
         JSONObject response = HttpConnectionUtils.get(WX_URL.URL_GET_JSAPI_TICKET, data);
         log.debug("url:" + WX_URL.URL_GET_JSAPI_TICKET + "; params : " + data + " ;response: " + response);
@@ -83,7 +83,7 @@ public class JSAPITicketServiceImpl implements JSAPITicketService {
 
         //请求成功
         if (errcode == 0) {
-            saveTicket(ticket, expiresIn, ticketType);
+            saveTicket(ticket, expiresIn, ticketTypeEnum);
             return ticket;
         }
         log.error("get jsapiticket for accessToken" + accessToken + " failed. result is :" + response);
@@ -98,7 +98,7 @@ public class JSAPITicketServiceImpl implements JSAPITicketService {
     public Map<String, String> getSign(String url) {
         try {
             accessToken = baseAccessTokenService.getToken();
-            String jsapi_ticket = getTicket(accessToken, TicketType.JSAPI);
+            String jsapi_ticket = getTicket(accessToken, TicketTypeEnum.JSAPI);
 
             Map<String, String> ret = new HashMap<String, String>();
             String nonce_str = create_nonce_str();

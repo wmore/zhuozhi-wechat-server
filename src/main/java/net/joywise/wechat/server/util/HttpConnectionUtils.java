@@ -113,7 +113,7 @@ public class HttpConnectionUtils {
         RestTemplate restTemplate = getRestTemplate();
         ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class, formParms);
         Integer code = response.getStatusCode().value();
-        if (200 != code) {
+        if (HTTP_CODE_NORMAL != code) {
             //错误返回值处理
         }
 
@@ -147,7 +147,7 @@ public class HttpConnectionUtils {
         log.info(uri.toString());
         ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
         Integer code = response.getStatusCode().value();
-        if (200 != code) {
+        if (HTTP_CODE_NORMAL != code) {
 
             //错误返回值处理
 
@@ -183,7 +183,7 @@ public class HttpConnectionUtils {
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class, map);
         Integer code = response.getStatusCode().value();
 
-        if (200 != code) {
+        if (HTTP_CODE_NORMAL != code) {
 
             //错误返回值处理
 

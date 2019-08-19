@@ -30,9 +30,9 @@ public class OnApplicationLoadingRunner implements CommandLineRunner {
     }
 
     private void clearAllRedisCache() {
-        redisUtil.delKeys(CACHE_KEY.ACCESS_TOKEN_KEY);
-        redisUtil.delKeys(CACHE_KEY.OAUTH2_ACCESS_TOKEN_KEY_PREFIX + "*");
-        redisUtil.delKeys(CACHE_KEY.TICKET_KEY_PREFIX + "*");
+//        redisUtil.delKeys(CACHE_KEY.ACCESS_TOKEN_KEY);
+//        redisUtil.delKeys(CACHE_KEY.OAUTH2_ACCESS_TOKEN_KEY_PREFIX + "*");
+//        redisUtil.delKeys(CACHE_KEY.TICKET_KEY_PREFIX + "*");
 
         log.warn("..OnApplicationLoadingRunner, clearAllRedisCache..");
     }

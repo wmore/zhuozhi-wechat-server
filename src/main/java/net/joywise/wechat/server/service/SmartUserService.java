@@ -20,6 +20,8 @@ public interface SmartUserService {
 
     SmartUser bind(SmartUser smartUser);
 
+    void unBind(String openId);
+
     SmartUser loginSmartPlatform(SmartUser smartUser);
 
     SmartUser getUserInfo(String openId);
